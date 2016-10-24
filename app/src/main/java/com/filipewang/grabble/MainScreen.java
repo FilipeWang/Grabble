@@ -20,5 +20,13 @@ public class MainScreen extends AppCompatActivity {
                 startActivity(new Intent(MainScreen.this,SettingsScreen.class));
             }
         });
+
+        ImageButton infoButton = (ImageButton) findViewById(R.id.infoButton);
+        infoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainScreen.this,InfoScreen.class));
+            }
+        });
     }
 }
