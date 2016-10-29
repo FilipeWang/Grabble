@@ -14,20 +14,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Capture"
-        android:id="@+id/button"
-        android:layout_marginBottom="195dp"
-        android:layout_marginStart="32dp"
-        android:layout_above="@+id/infoButton"
-        android:layout_toEndOf="@+id/infoButton" />
+        android:id="@+id/mainCapture"
+        android:background="@android:color/transparent"
+        android:layout_below="@+id/mainTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="63dp" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Word Creator"
-        android:id="@+id/button2"
-        android:layout_alignTop="@+id/button"
-        android:layout_toEndOf="@+id/button"
-        android:layout_marginStart="30dp" />
+        android:id="@+id/mainWord"
+        android:background="@android:color/transparent"
+        android:layout_alignTop="@+id/mainCapture"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="74dp" />
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -44,4 +45,14 @@
         android:background="@drawable/info"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Grabble"
+        android:layout_marginTop="150dp"
+        android:id="@+id/mainTitle"
+        android:textSize="70sp"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
