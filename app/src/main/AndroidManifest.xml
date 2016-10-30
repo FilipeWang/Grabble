@@ -18,6 +18,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainScreen"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,9 +29,11 @@
         <activity
             android:name=".SettingsScreen"
             android:label="@string/title_activity_settings_screen"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".InfoScreen"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
     </application>
