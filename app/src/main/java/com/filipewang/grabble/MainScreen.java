@@ -69,8 +69,10 @@ public class MainScreen extends AppCompatActivity {
                     Snackbar.make(findViewById(R.id.coordinatorLayout),"Turn on your GPS!", Snackbar.LENGTH_LONG)
                             .show();
                 } else{
-                    Snackbar.make(findViewById(R.id.coordinatorLayout),"You pass!", Snackbar.LENGTH_LONG)
-                            .show();
+                    CalendarManager test = new CalendarManager();
+                    String currDayWeek = test.getDayOfWeek();
+                    String currDay = test.getCurrentDay();
+                    new DownloadMapData().execute(currDayWeek,currDay);
                 }
             }
         });
@@ -79,10 +81,6 @@ public class MainScreen extends AppCompatActivity {
         wordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CalendarManager test = new CalendarManager();
-                String currDayWeek = test.getDayOfWeek();
-                String currDay = test.getCurrentDay();
-                new DownloadMapData().execute(currDayWeek,currDay);
             }
         });
 
@@ -150,6 +148,8 @@ public class MainScreen extends AppCompatActivity {
             if(!flag){
                 Snackbar.make(findViewById(R.id.coordinatorLayout),"Some error occurred!", Snackbar.LENGTH_LONG)
                         .show();
+            } else{
+                startActivity(new Intent(MainScreen.this,CaptureScreen.class));
             }
 
         }
