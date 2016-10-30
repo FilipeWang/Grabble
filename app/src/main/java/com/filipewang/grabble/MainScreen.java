@@ -3,6 +3,9 @@ package com.filipewang.grabble;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
@@ -12,7 +15,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,9 +52,26 @@ public class MainScreen extends AppCompatActivity {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ConnectivityManager cm =
+                        (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-                Snackbar.make(findViewById(R.id.coordinatorLayout),"No internet!", Snackbar.LENGTH_LONG)
-                        .show();
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                boolean gpsLocation = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                boolean networkLocation = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                boolean isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+
+                if(!isConnected){
+                    Snackbar.make(findViewById(R.id.coordinatorLayout),"Connect to the internet!", Snackbar.LENGTH_LONG)
+                            .show();
+                } else if(!networkLocation && !gpsLocation){
+                    Snackbar.make(findViewById(R.id.coordinatorLayout),"Turn on your GPS!", Snackbar.LENGTH_LONG)
+                            .show();
+                } else{
+                    Snackbar.make(findViewById(R.id.coordinatorLayout),"You pass!", Snackbar.LENGTH_LONG)
+                            .show();
+                }
             }
         });
 
@@ -88,8 +107,6 @@ public class MainScreen extends AppCompatActivity {
             int count;
             dayOfWeek = data[0];
             currDay = data[1];
-            //Context context = getApplicationContext();
-            //int duration = Toast.LENGTH_SHORT;
             String urlBase = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/";
             String urlString = urlBase + dayOfWeek + ".kml";
             File kmlFile = new File(root+"/" + currDay + ".kml");
@@ -131,10 +148,8 @@ public class MainScreen extends AppCompatActivity {
             }
             progressDialog.dismiss();
             if(!flag){
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "An error has ocurred!", duration);
-                toast.show();
+                Snackbar.make(findViewById(R.id.coordinatorLayout),"Some error occurred!", Snackbar.LENGTH_LONG)
+                        .show();
             }
 
         }
