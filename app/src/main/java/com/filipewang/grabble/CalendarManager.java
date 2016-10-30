@@ -1,5 +1,7 @@
 package com.filipewang.grabble;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -19,5 +21,11 @@ public class CalendarManager {
         day = day - 1;
         String currWeekDay = weekDays[day];
         return currWeekDay;
+    }
+
+    public String getCurrentDay(){
+        DateFormat df = new SimpleDateFormat("ddMMyyy");
+        String currDay = df.format(cal.getTime());
+        return currDay;
     }
 }

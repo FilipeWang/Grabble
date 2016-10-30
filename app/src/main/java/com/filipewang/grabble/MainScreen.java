@@ -64,17 +64,20 @@ public class MainScreen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 CalendarManager test = new CalendarManager();
-                String currDay = test.getDayOfWeek();
-                new DownloadMapData().execute(currDay);
+                String currDayWeek = test.getDayOfWeek();
+                String currDay = test.getCurrentDay();
+                new DownloadMapData().execute(currDayWeek,currDay);
             }
         });
 
     }
 
-    class DownloadMapData extends AsyncTask<String,Void,Void> {
 
+    class DownloadMapData extends AsyncTask<String,Void,Boolean> {
         private String root = Environment.getExternalStorageDirectory().toString();
         private String TAG = "DOWNLOADMAPDATA";
+        private String dayOfWeek;
+        private String currDay;
 
         @Override
         protected void onPreExecute(){
@@ -84,36 +87,59 @@ public class MainScreen extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(String... data) {
+        protected Boolean doInBackground(String... data) {
             int count;
-            File kmlFile = new File(root+"/" + data[0] + ".kml");
+            dayOfWeek = data[0];
+            currDay = data[1];
+            //Context context = getApplicationContext();
+            //int duration = Toast.LENGTH_SHORT;
+            String urlBase = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/";
+            String urlString = urlBase + dayOfWeek + ".kml";
+            File kmlFile = new File(root+"/" + currDay + ".kml");
             try {
-                kmlFile.createNewFile();
-                URL url = new URL(data[0]);
-                URLConnection urlCon = url.openConnection();
-                urlCon.connect();
-                InputStream inStream = urlCon.getInputStream();
-                OutputStream outStream = new FileOutputStream(kmlFile);
-                byte [] textData = new byte[1024];
-                while((count = inStream.read(textData)) != -1){
-                    outStream.write(textData,0,count);
+                if(kmlFile.exists() && !kmlFile.isDirectory()){
+                    Log.d(TAG,"Exists!");
                 }
-                outStream.flush();
-                outStream.close();
-                inStream.close();
-            } catch (Exception e) {
-                Log.d(TAG, "Exception in AsyncTask ");
+                else {
+                    URL url = new URL(urlString);
+                    URLConnection urlCon = url.openConnection();
+                    urlCon.connect();
+                    kmlFile.createNewFile();
+                    InputStream inStream = urlCon.getInputStream();
+                    OutputStream outStream = new FileOutputStream(kmlFile);
+                    byte[] textData = new byte[1024];
+                    while ((count = inStream.read(textData)) != -1) {
+                        outStream.write(textData, 0, count);
+                    }
+                    outStream.flush();
+                    outStream.close();
+                    inStream.close();
+                }
+            } catch (Exception e1) {
+                Log.d(TAG,"Issues");
+                return false;
             }
-            return null;
+            return true;
         }
 
         @Override
-        protected void onPostExecute(Void x){
+        protected void onPostExecute(Boolean flag){
+            File rootFolder = new File(root);
+            File fileList[] = rootFolder.listFiles();
+            for(File f: fileList){
+                if(f.getName().endsWith(".kml") && !(f.getName().equals(currDay + ".kml"))){
+                    Log.d(TAG,f.getName());
+                    f.delete();
+                }
+            }
             progressDialog.dismiss();
-            Context context = getApplicationContext();
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, "HURRAY!", duration);
-            toast.show();
+            if(!flag){
+                Context context = getApplicationContext();
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, "An error has ocurred!", duration);
+                toast.show();
+            }
+
         }
     }
 }
