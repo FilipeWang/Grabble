@@ -63,10 +63,10 @@ public class MainScreen extends AppCompatActivity {
                         activeNetwork.isConnectedOrConnecting();
 
                 if(!isConnected){
-                    Snackbar.make(findViewById(R.id.coordinatorLayout),"Connect to the internet!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain),"Connect to the internet!", Snackbar.LENGTH_LONG)
                             .show();
                 } else if(!networkLocation && !gpsLocation){
-                    Snackbar.make(findViewById(R.id.coordinatorLayout),"Turn on your GPS!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain),"Turn on your GPS!", Snackbar.LENGTH_LONG)
                             .show();
                 } else{
                     CalendarManager test = new CalendarManager();
@@ -146,7 +146,7 @@ public class MainScreen extends AppCompatActivity {
             }
             progressDialog.dismiss();
             if(!flag){
-                Snackbar.make(findViewById(R.id.coordinatorLayout),"Some error occurred!", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.coordinatorLayoutMain),"Some error occurred!", Snackbar.LENGTH_LONG)
                         .show();
             } else{
                 startActivity(new Intent(MainScreen.this,CaptureScreen.class));

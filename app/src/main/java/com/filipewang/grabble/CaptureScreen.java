@@ -1,9 +1,12 @@
 package com.filipewang.grabble;
 
 import android.app.ProgressDialog;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
 
+import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,6 +31,14 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         progressDialog.show();
         mapFragment.getMapAsync(this);
 
+        FloatingActionButton b1 = (FloatingActionButton) findViewById(R.id.floating1);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(findViewById(R.id.coordinatorLayoutCapture),"Test!", Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        });
     }
 
 
