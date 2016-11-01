@@ -2,6 +2,7 @@ package com.filipewang.grabble;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -14,6 +15,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
@@ -22,8 +27,10 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private ProgressDialog progressDialog;
     private CalendarManager calendarManager;
-    private KMLParser kmlParser;
     private String TAG = "CaptureScreen";
+    private String root = Environment.getExternalStorageDirectory().toString();
+    private String currDay;
+    private ArrayList<MarkerData> markerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +41,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
 
         calendarManager = new CalendarManager();
-        String currDay = calendarManager.getCurrentDay();
-        kmlParser = new KMLParser(currDay + ".kml");
+        currDay = calendarManager.getCurrentDay();
+        markerList = retrieveMarkerList();
 
         progressDialog = ProgressDialog.show(CaptureScreen.this,"Preparing the Map",
                 "Preparing the map, please wait...", false, false);
@@ -81,10 +88,36 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         //Set max zoom out
         //mMap.setMinZoomPreference(17);
 
-        ArrayList<MarkerData> markerList = kmlParser.parseFile();
-        mMap.addMarker(new MarkerOptions().position(markerList.get(0).coordinates).title(markerList.get(0).letter));
-        Log.d(TAG,markerList.get(0).coordinates.toString());
+        mMap.addMarker(new MarkerOptions()
+                .position(markerList.get(0).getCoordinates())
+                .title(markerList.get(0).letter));
+        Log.d(TAG, String.valueOf(markerList.size()));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(markerList.get(0).coordinates));
         progressDialog.dismiss();
+    }
+
+    public void storeMarkerList(ArrayList<MarkerData> markerList){
+        try{
+            FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(markerList);
+            oos.close();
+        } catch(Exception e){
+            Log.d(TAG, "File creation error!");
+        }
+    }
+
+    public ArrayList<MarkerData> retrieveMarkerList(){
+        try{
+            FileInputStream fis = new FileInputStream(root + "/" + currDay + ".tmp");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            ArrayList<MarkerData> markers = (ArrayList<MarkerData>) ois.readObject();
+            ois.close();
+            return markers;
+        } catch(Exception e){
+            Log.d(TAG, "File retrieval error!");
+            ArrayList<MarkerData> markers = new ArrayList<>();
+            return markers;
+        }
     }
 }

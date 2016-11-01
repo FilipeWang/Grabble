@@ -7,10 +7,10 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,9 +19,11 @@ import android.widget.ImageButton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 public class MainScreen extends AppCompatActivity {
 
@@ -36,7 +38,7 @@ public class MainScreen extends AppCompatActivity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainScreen.this,SettingsScreen.class));
+                startActivity(new Intent(MainScreen.this, SettingsScreen.class));
             }
         });
 
@@ -44,7 +46,7 @@ public class MainScreen extends AppCompatActivity {
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainScreen.this,InfoScreen.class));
+                startActivity(new Intent(MainScreen.this, InfoScreen.class));
             }
         });
 
@@ -62,17 +64,17 @@ public class MainScreen extends AppCompatActivity {
                 boolean isConnected = activeNetwork != null &&
                         activeNetwork.isConnectedOrConnecting();
 
-                if(!isConnected){
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain),"Connect to the internet!", Snackbar.LENGTH_LONG)
+                if (!isConnected) {
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Connect to the internet!", Snackbar.LENGTH_LONG)
                             .show();
-                } else if(!networkLocation && !gpsLocation){
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain),"Turn on your GPS!", Snackbar.LENGTH_LONG)
+                } else if (!networkLocation && !gpsLocation) {
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Turn on your GPS!", Snackbar.LENGTH_LONG)
                             .show();
-                } else{
+                } else {
                     CalendarManager test = new CalendarManager();
                     String currDayWeek = test.getDayOfWeek();
                     String currDay = test.getCurrentDay();
-                    new DownloadMapData().execute(currDayWeek,currDay);
+                    new DownloadMapData().execute(currDayWeek, currDay);
                 }
             }
         });
@@ -87,15 +89,15 @@ public class MainScreen extends AppCompatActivity {
     }
 
 
-    class DownloadMapData extends AsyncTask<String,Void,Boolean> {
+    class DownloadMapData extends AsyncTask<String, Void, Boolean> {
         private String root = Environment.getExternalStorageDirectory().toString();
         private String TAG = "DownloadMapData";
         private String dayOfWeek;
         private String currDay;
 
         @Override
-        protected void onPreExecute(){
-            progressDialog = ProgressDialog.show(MainScreen.this,"Downloading",
+        protected void onPreExecute() {
+            progressDialog = ProgressDialog.show(MainScreen.this, "Downloading",
                     "Downloading markers for the map, please wait...", false, false);
             progressDialog.show();
         }
@@ -107,12 +109,12 @@ public class MainScreen extends AppCompatActivity {
             currDay = data[1];
             String urlBase = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/";
             String urlString = urlBase + dayOfWeek + ".kml";
-            File kmlFile = new File(root+"/" + currDay + ".kml");
+            File kmlFile = new File(root + "/" + currDay + ".kml");
+            File actualFile = new File(root + "/" + currDay + ".tmp");
             try {
-                if(kmlFile.exists() && !kmlFile.isDirectory()){
-                    Log.d(TAG,"Exists!");
-                }
-                else {
+                if (actualFile.exists() && !actualFile.isDirectory()) {
+                    Log.d(TAG, "Exists!");
+                } else {
                     URL url = new URL(urlString);
                     URLConnection urlCon = url.openConnection();
                     urlCon.connect();
@@ -128,30 +130,50 @@ public class MainScreen extends AppCompatActivity {
                     inStream.close();
                 }
             } catch (Exception e1) {
-                Log.d(TAG,"Issues");
+                Log.d(TAG, "Issues");
                 return false;
             }
             return true;
         }
 
+
         @Override
-        protected void onPostExecute(Boolean flag){
+        protected void onPostExecute(Boolean flag) {
+            File actualFile = new File(root + "/" + currDay + ".tmp");
+            if (!(actualFile.exists() && !actualFile.isDirectory() && flag)) {
+                try {
+                    if (!flag) {
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error downloading the files occurred!", Snackbar.LENGTH_LONG)
+                                .show();
+                    } else {
+                        KMLParser kmlParser = new KMLParser(currDay + ".kml");
+                        ArrayList<MarkerData> markerList = kmlParser.parseFile();
+                        Log.d(TAG, String.valueOf(markerList.size()));
+                        FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
+                        ObjectOutputStream oos = new ObjectOutputStream(fos);
+                        oos.writeObject(markerList);
+                        oos.close();
+                    }
+                } catch (Exception e) {
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error storing files occurred!", Snackbar.LENGTH_LONG)
+                            .show();
+                }
+            }
+            cleanUp();
+            progressDialog.dismiss();
+            startActivity(new Intent(MainScreen.this, CaptureScreen.class));
+        }
+
+        private void cleanUp() {
             File rootFolder = new File(root);
             File fileList[] = rootFolder.listFiles();
-            for(File f: fileList){
-                if(f.getName().endsWith(".kml") && !(f.getName().equals(currDay + ".kml"))){
-                    Log.d(TAG,f.getName());
+            for (File f : fileList) {
+                if (f.getName().endsWith(".kml")
+                        || (f.getName().endsWith(".tmp") && !(f.getName().equals(currDay + ".tmp")))) {
                     f.delete();
                 }
             }
-            progressDialog.dismiss();
-            if(!flag){
-                Snackbar.make(findViewById(R.id.coordinatorLayoutMain),"Some error occurred!", Snackbar.LENGTH_LONG)
-                        .show();
-            } else{
-                startActivity(new Intent(MainScreen.this,CaptureScreen.class));
-            }
-
         }
     }
+
 }

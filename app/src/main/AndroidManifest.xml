@@ -50,6 +50,7 @@
         <activity
             android:name=".CaptureScreen"
             android:label="@string/title_activity_capture_screen"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
     </application>
 
