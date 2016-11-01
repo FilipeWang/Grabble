@@ -89,7 +89,7 @@ public class MainScreen extends AppCompatActivity {
 
     class DownloadMapData extends AsyncTask<String,Void,Boolean> {
         private String root = Environment.getExternalStorageDirectory().toString();
-        private String TAG = "DOWNLOADMAPDATA";
+        private String TAG = "DownloadMapData";
         private String dayOfWeek;
         private String currDay;
 
