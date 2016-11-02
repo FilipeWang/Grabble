@@ -13,8 +13,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -22,7 +24,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
-public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback {
+public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
     private ProgressDialog progressDialog;
@@ -59,6 +61,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         });
     }
 
+    /*@Override
+    protected void onStop(){
+        storeMarkerList(markerList);
+        super.onStop();
+    }*/
+
 
     /**
      * Manipulates the map once available.
@@ -84,20 +92,39 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         this, R.raw.style_json));
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setOnInfoWindowClickListener(this);
 
         //Set max zoom out
         //mMap.setMinZoomPreference(17);
 
-        mMap.addMarker(new MarkerOptions()
-                .position(markerList.get(0).getCoordinates())
-                .title(markerList.get(0).letter));
-        Log.d(TAG, String.valueOf(markerList.size()));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(markerList.get(0).coordinates));
+        for(MarkerData curr: markerList){
+            mMap.addMarker(new MarkerOptions()
+                    .position(curr.getCoordinates())
+                    .title(curr.letter)
+                    .snippet(curr.name));
+        }
         progressDialog.dismiss();
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        String point = marker.getSnippet();
+        marker.remove();
+        int index = -1;
+        for(int i = 0; i<markerList.size(); i++){
+            if(markerList.get(i).name.equals(point)){
+                index = i;
+                i = markerList.size();
+            }
+        }
+        markerList.remove(index);
+       // storeMarkerList(markerList);
     }
 
     public void storeMarkerList(ArrayList<MarkerData> markerList){
         try{
+            File del = new File(root + "/" + currDay + ".tmp");
+            del.delete();
             FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(markerList);
