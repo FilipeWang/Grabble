@@ -45,6 +45,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         calendarManager = new CalendarManager();
         currDay = calendarManager.getCurrentDay();
         markerList = retrieveMarkerList();
+        storeMarkerList(markerList);
 
         progressDialog = ProgressDialog.show(CaptureScreen.this,"Preparing the Map",
                 "Preparing the map, please wait...", false, false);
@@ -118,7 +119,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             }
         }
         markerList.remove(index);
-       // storeMarkerList(markerList);
+        storeMarkerList(markerList);
+        markerList = retrieveMarkerList();
     }
 
     public void storeMarkerList(ArrayList<MarkerData> markerList){
