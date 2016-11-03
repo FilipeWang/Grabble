@@ -25,7 +25,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
-public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback{
 
     private GoogleMap mMap;
     private ProgressDialog progressDialog;
@@ -96,7 +96,21 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         this, R.raw.style_json));
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                String point = marker.getSnippet();
+                marker.remove();
+                int index = -1;
+                for(int i = 0; i<markerList.size(); i++){
+                    if(markerList.get(i).name.equals(point)){
+                        index = i;
+                        i = markerList.size();
+                    }
+                }
+                markerList.remove(index);
+            }
+        });
 
         // Since we are consuming the event this is necessary to
         // manage closing openned markers before openning new ones
@@ -146,20 +160,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
         progressDialog.dismiss();
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        String point = marker.getSnippet();
-        marker.remove();
-        int index = -1;
-        for(int i = 0; i<markerList.size(); i++){
-            if(markerList.get(i).name.equals(point)){
-                index = i;
-                i = markerList.size();
-            }
-        }
-        markerList.remove(index);
     }
 
     public void storeMarkerList(ArrayList<MarkerData> markerList){
