@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -47,9 +48,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         markerList = retrieveMarkerList();
         storeMarkerList(markerList);
 
-        progressDialog = ProgressDialog.show(CaptureScreen.this,"Preparing the Map",
-                "Preparing the map, please wait...", false, false);
-        progressDialog.show();
         mapFragment.getMapAsync(this);
 
         FloatingActionButton b1 = (FloatingActionButton) findViewById(R.id.floating1);
@@ -62,11 +60,16 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         });
     }
 
-    /*@Override
-    protected void onStop(){
+    @Override
+    protected void onPause(){
+        progressDialog = ProgressDialog.show(CaptureScreen.this,"Saving Data",
+                "Saving markers, please wait...", false, false);
+        progressDialog.show();
         storeMarkerList(markerList);
-        super.onStop();
-    }*/
+        markerList = retrieveMarkerList();
+        progressDialog.dismiss();
+        super.onPause();
+    }
 
 
     /**
@@ -95,8 +98,44 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.setOnInfoWindowClickListener(this);
 
+        // Since we are consuming the event this is necessary to
+        // manage closing openned markers before openning new ones
+        // Based on:
+        // http://stackoverflow.com/questions/14497734/dont-snap-to-marker-after-click-in-android-map-v2
+        final Marker[] lastOpenned = {null};
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            public boolean onMarkerClick(Marker marker) {
+                // Check if there is an open info window
+                if (lastOpenned[0] != null) {
+                    // Close the info window
+                    lastOpenned[0].hideInfoWindow();
+
+                    // Is the marker the same marker that was already open
+                    if (lastOpenned[0].equals(marker)) {
+                        // Nullify the lastOpenned object
+                        lastOpenned[0] = null;
+                        // Return so that the info window isn't openned again
+                        return true;
+                    }
+                }
+
+                // Open the info window for the marker
+                marker.showInfoWindow();
+                // Re-assign the last openned such that we can close it later
+                lastOpenned[0] = marker;
+
+                // Event was handled by our code do not launch default behaviour.
+                return true;
+            }
+        });
+
         //Set max zoom out
         //mMap.setMinZoomPreference(17);
+
+        progressDialog = ProgressDialog.show(CaptureScreen.this,"Loading markers",
+                "Placing markers, please wait...", false, false);
+        progressDialog.show();
 
         for(MarkerData curr: markerList){
             mMap.addMarker(new MarkerOptions()
@@ -104,6 +143,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     .title(curr.letter)
                     .snippet(curr.name));
         }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
         progressDialog.dismiss();
     }
 
@@ -119,8 +160,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             }
         }
         markerList.remove(index);
-        storeMarkerList(markerList);
-        markerList = retrieveMarkerList();
     }
 
     public void storeMarkerList(ArrayList<MarkerData> markerList){

@@ -128,6 +128,13 @@ public class MainScreen extends AppCompatActivity {
                     outStream.flush();
                     outStream.close();
                     inStream.close();
+
+                    KMLParser kmlParser = new KMLParser(currDay + ".kml");
+                    ArrayList<MarkerData> markerList = kmlParser.parseFile();
+                    FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+                    oos.writeObject(markerList);
+                    oos.close();
                 }
             } catch (Exception e1) {
                 Log.d(TAG, "Issues");
@@ -139,29 +146,14 @@ public class MainScreen extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean flag) {
-            File actualFile = new File(root + "/" + currDay + ".tmp");
-            if (!(actualFile.exists() && !actualFile.isDirectory() && flag)) {
-                try {
-                    if (!flag) {
-                        Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error downloading the files occurred!", Snackbar.LENGTH_LONG)
-                                .show();
-                    } else {
-                        KMLParser kmlParser = new KMLParser(currDay + ".kml");
-                        ArrayList<MarkerData> markerList = kmlParser.parseFile();
-                        Log.d(TAG, String.valueOf(markerList.size()));
-                        FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
-                        ObjectOutputStream oos = new ObjectOutputStream(fos);
-                        oos.writeObject(markerList);
-                        oos.close();
-                    }
-                } catch (Exception e) {
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error storing files occurred!", Snackbar.LENGTH_LONG)
-                            .show();
-                }
+            if (!flag) {
+                Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error downloading the files occurred!", Snackbar.LENGTH_LONG)
+                        .show();
+            } else {
+                cleanUp();
+                progressDialog.dismiss();
+                startActivity(new Intent(MainScreen.this, CaptureScreen.class));
             }
-            cleanUp();
-            progressDialog.dismiss();
-            startActivity(new Intent(MainScreen.this, CaptureScreen.class));
         }
 
         private void cleanUp() {
