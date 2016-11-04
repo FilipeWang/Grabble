@@ -1,6 +1,5 @@
 package com.filipewang.grabble;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -23,8 +22,6 @@ import java.util.ArrayList;
 public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback{
 
     private GoogleMap mMap;
-    private ProgressDialog progressDialog;
-    private CalendarManager calendarManager;
     private FileManager fm;
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
@@ -37,7 +34,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
-        calendarManager = new CalendarManager();
         fm = new FileManager();
         markerList = fm.retrieveMarkerList();
         fm.setMarkerList(markerList);

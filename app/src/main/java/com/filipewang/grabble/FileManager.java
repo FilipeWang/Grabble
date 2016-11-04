@@ -3,12 +3,20 @@ package com.filipewang.grabble;
 import android.os.Environment;
 import android.util.Log;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Created by Filipe on 04-Nov-16.
@@ -28,7 +36,6 @@ public class FileManager {
     public void setMarkerList(ArrayList<MarkerData> temp){
         markerList = temp;
     }
-    public ArrayList<MarkerData> getMarkerList(){return markerList;}
 
     public void storeMarkerList(){
         try{
@@ -55,5 +62,41 @@ public class FileManager {
             ArrayList<MarkerData> markers = null;
             return markers;
         }
+    }
+
+    public ArrayList<MarkerData> parseKmlFile(String fileName){
+        File KMLFile = new File(root + "/" + fileName);
+        ArrayList<MarkerData> markerList = new ArrayList<>();
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(KMLFile);
+            doc.getDocumentElement().normalize();
+            NodeList list = doc.getElementsByTagName("Placemark");
+
+            for(int i = 0; i < list.getLength(); i++){
+                String name = "";
+                String coordinates = "";
+                String letter = "";
+                Node curr = list.item(i);
+                if (curr.getNodeType() == Node.ELEMENT_NODE) {
+                    Element e = (Element) curr;
+                    name = e.getElementsByTagName("name").item(0).getTextContent();
+                    letter = e.getElementsByTagName("description").item(0).getTextContent();
+                    NodeList list2 = e.getElementsByTagName("Point");
+                    Node curr2 = list2.item(0);
+                    if (curr2.getNodeType() == Node.ELEMENT_NODE){
+                        Element e2 = (Element) curr2;
+                        coordinates = e2.getElementsByTagName("coordinates").item(0).getTextContent();
+                    }
+                }
+
+                MarkerData temp = new MarkerData(name,letter,coordinates);
+                markerList.add(temp);
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error parsing KML");
+        }
+        return markerList;
     }
 }

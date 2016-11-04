@@ -128,9 +128,8 @@ public class MainScreen extends AppCompatActivity {
                     outStream.close();
                     inStream.close();
 
-                    KMLParser kmlParser = new KMLParser(currDay + ".kml");
-                    ArrayList<MarkerData> markerList = kmlParser.parseFile();
                     FileManager fm = new FileManager();
+                    ArrayList<MarkerData> markerList = fm.parseKmlFile(currDay + ".kml");
                     fm.setMarkerList(markerList);
                     fm.storeMarkerList();
                 }
