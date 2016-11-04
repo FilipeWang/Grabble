@@ -1,9 +1,11 @@
 package com.filipewang.grabble;
 
 import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -54,19 +56,15 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    protected void onPause(){
-        fm.setMarkerList(markerList);
-        fm.storeMarkerList();
+    protected void onResume(){
         markerList = fm.retrieveMarkerList();
-        super.onPause();
+        super.onResume();
     }
 
     @Override
-    protected void onStop(){
-        fm.setMarkerList(markerList);
-        fm.storeMarkerList();
+    protected void onRestart(){
         markerList = fm.retrieveMarkerList();
-        super.onStop();
+        super.onRestart();
     }
 
 
@@ -92,6 +90,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.setBuildingsEnabled(false);
+
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -105,6 +104,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     }
                 }
                 markerList.remove(index);
+                new StoreData().execute(markerList);
             }
         });
 
@@ -152,5 +152,27 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
+    }
+
+    class StoreData extends AsyncTask<ArrayList<MarkerData>, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(ArrayList<MarkerData>... arrayLists) {
+            try{
+                FileManager fm = new FileManager();
+                fm.setMarkerList(arrayLists[0]);
+                fm.storeMarkerList();
+                return true;
+            } catch(Exception e){
+                return false;
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(Boolean flag) {
+            if(!flag)
+                Log.d(TAG, "Error in storing data!");
+        }
     }
 }

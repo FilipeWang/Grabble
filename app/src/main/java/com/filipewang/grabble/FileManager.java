@@ -28,6 +28,7 @@ public class FileManager {
     public void setMarkerList(ArrayList<MarkerData> temp){
         markerList = temp;
     }
+    public ArrayList<MarkerData> getMarkerList(){return markerList;}
 
     public void storeMarkerList(){
         try{
