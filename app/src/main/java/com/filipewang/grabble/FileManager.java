@@ -64,6 +64,33 @@ public class FileManager {
         }
     }
 
+    public int [] retrieveLetters(){
+        try{
+            FileInputStream fis = new FileInputStream(root + "/data.dat");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            int [] letters = (int []) ois.readObject();
+            ois.close();
+            return letters;
+        } catch(Exception e){
+            Log.d(TAG, "File retrieval error!");
+            int [] letters = null;
+            return letters;
+        }
+    }
+
+    public void storeLetters(int [] letters){
+        try{
+            File del = new File(root + "/data.dat");
+            del.delete();
+            FileOutputStream fos = new FileOutputStream(root + "/data.dat");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(letters);
+            oos.close();
+        } catch(Exception e){
+            Log.d(TAG, "File creation error!");
+        }
+    }
+
     public ArrayList<MarkerData> parseKmlFile(String fileName){
         File KMLFile = new File(root + "/" + fileName);
         ArrayList<MarkerData> markerList = new ArrayList<>();

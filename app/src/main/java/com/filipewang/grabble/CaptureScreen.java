@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 
@@ -25,6 +26,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private FileManager fm;
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
+    private int [] letterCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +37,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
 
         fm = new FileManager();
+        letterCount = fm.retrieveLetters();
+        if(letterCount == null)
+            letterCount = new int[26];
         markerList = fm.retrieveMarkerList();
         fm.setMarkerList(markerList);
         fm.storeMarkerList();
+        fm.storeLetters(letterCount);
 
         mapFragment.getMapAsync(this);
 
@@ -45,8 +51,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(findViewById(R.id.coordinatorLayoutCapture),"Test!", Snackbar.LENGTH_LONG)
-                        .show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
+                String currentInventory = getLetterCount();
+                builder.setMessage(currentInventory)
+                        .setTitle("Letter Inventory");
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
     }
@@ -54,16 +64,16 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     @Override
     protected void onResume(){
         markerList = fm.retrieveMarkerList();
+        letterCount = fm.retrieveLetters();
         super.onResume();
     }
 
     @Override
     protected void onRestart(){
         markerList = fm.retrieveMarkerList();
+        letterCount = fm.retrieveLetters();
         super.onRestart();
     }
-
-
 
     /**
      * Manipulates the map once available.
@@ -100,7 +110,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     }
                 }
                 markerList.remove(index);
-                new StoreData().execute(markerList);
+                char c = marker.getTitle().charAt(0);
+                int numValue = (int) c;
+                int indexLetter = numValue - 65;
+                letterCount[indexLetter]++;
+                new StoreDataMarker().execute(markerList);
+                new StoreDataLetters().execute(letterCount);
             }
         });
 
@@ -139,18 +154,32 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         //Set max zoom out
         //mMap.setMinZoomPreference(17);
 
-
-        for(MarkerData curr: markerList){
-            mMap.addMarker(new MarkerOptions()
-                    .position(curr.getCoordinates())
-                    .title(curr.letter)
-                    .snippet(curr.name));
+        try{
+            for(MarkerData curr: markerList){
+                mMap.addMarker(new MarkerOptions()
+                        .position(curr.getCoordinates())
+                        .title(curr.letter)
+                        .snippet(curr.name));
+            }
+        } catch (Exception e){
+            Snackbar.make(findViewById(R.id.coordinatorLayoutCapture),"No more letters for today!", Snackbar.LENGTH_LONG)
+                    .show();
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
     }
 
-    class StoreData extends AsyncTask<ArrayList<MarkerData>, Void, Boolean> {
+    public String getLetterCount(){
+        String text = "";
+        for(int i = 0; i < 26; i++){
+            if(i > 0 && i % 5 == 0)
+                text = text + "\n";
+            text = text + Character.toString((char) (i + 65)) + ": " + letterCount[i] + "     ";
+        }
+        return text;
+    }
+
+    class StoreDataMarker extends AsyncTask<ArrayList<MarkerData>, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(ArrayList<MarkerData>... arrayLists) {
@@ -164,6 +193,25 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             }
         }
 
+        @Override
+        protected void onPostExecute(Boolean flag) {
+            if(!flag)
+                Log.d(TAG, "Error in storing data!");
+        }
+    }
+
+    class StoreDataLetters extends AsyncTask<int [], Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(int []... arrays) {
+            try{
+                FileManager fm = new FileManager();
+                fm.storeLetters(arrays[0]);
+                return true;
+            } catch(Exception e){
+                return false;
+            }
+        }
 
         @Override
         protected void onPostExecute(Boolean flag) {

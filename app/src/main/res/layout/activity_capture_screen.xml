@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_gravity="bottom|right"
         fab:menu_showShadow="false"
         fab:menu_backgroundColor="@android:color/transparent"
@@ -30,7 +30,7 @@
         fab:menu_labels_colorNormal="@android:color/transparent"
         fab:menu_labels_colorPressed="@android:color/transparent"
         fab:menu_labels_colorRipple="@android:color/transparent"
-        fab:menu_labels_textColor="#000000"
+        fab:menu_labels_textColor="#FFFFFF"
         fab:menu_labels_showShadow="false"
         fab:menu_icon="@drawable/menu"
         fab:menu_labels_singleLine="false"
@@ -89,6 +89,7 @@
         android:layout_marginBottom="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
 
 
 </FrameLayout>
