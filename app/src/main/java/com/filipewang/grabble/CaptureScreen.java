@@ -84,10 +84,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        //LatLng edinburgh = new LatLng(55.9533, 3.1883);
-        //mMap.addMarker(new MarkerOptions().position(edinburgh).title("Marker in Edinburgh"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(edinburgh));
 
         //Test styling
         mMap.setMapStyle(
@@ -95,6 +91,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         this, R.raw.style_json));
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setBuildingsEnabled(false);
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -146,9 +143,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         //Set max zoom out
         //mMap.setMinZoomPreference(17);
 
-        progressDialog = ProgressDialog.show(CaptureScreen.this,"Loading markers",
-                "Placing markers, please wait...", false, false);
-        progressDialog.show();
 
         for(MarkerData curr: markerList){
             mMap.addMarker(new MarkerOptions()
@@ -158,6 +152,5 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
-        progressDialog.dismiss();
     }
 }
