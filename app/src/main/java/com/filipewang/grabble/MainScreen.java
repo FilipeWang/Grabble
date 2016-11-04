@@ -19,7 +19,6 @@ import android.widget.ImageButton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -131,10 +130,9 @@ public class MainScreen extends AppCompatActivity {
 
                     KMLParser kmlParser = new KMLParser(currDay + ".kml");
                     ArrayList<MarkerData> markerList = kmlParser.parseFile();
-                    FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
-                    ObjectOutputStream oos = new ObjectOutputStream(fos);
-                    oos.writeObject(markerList);
-                    oos.close();
+                    FileManager fm = new FileManager();
+                    fm.setMarkerList(markerList);
+                    fm.storeMarkerList();
                 }
             } catch (Exception e1) {
                 Log.d(TAG, "Issues");
@@ -147,6 +145,7 @@ public class MainScreen extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean flag) {
             if (!flag) {
+                progressDialog.dismiss();
                 Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error downloading the files occurred!", Snackbar.LENGTH_LONG)
                         .show();
             } else {

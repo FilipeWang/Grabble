@@ -2,10 +2,8 @@ package com.filipewang.grabble;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -17,11 +15,6 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
@@ -30,9 +23,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private ProgressDialog progressDialog;
     private CalendarManager calendarManager;
+    private FileManager fm;
     private String TAG = "CaptureScreen";
-    private String root = Environment.getExternalStorageDirectory().toString();
-    private String currDay;
     private ArrayList<MarkerData> markerList;
 
     @Override
@@ -44,9 +36,10 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
 
         calendarManager = new CalendarManager();
-        currDay = calendarManager.getCurrentDay();
-        markerList = retrieveMarkerList();
-        storeMarkerList(markerList);
+        fm = new FileManager();
+        markerList = fm.retrieveMarkerList();
+        fm.setMarkerList(markerList);
+        fm.storeMarkerList();
 
         mapFragment.getMapAsync(this);
 
@@ -62,14 +55,20 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     @Override
     protected void onPause(){
-        progressDialog = ProgressDialog.show(CaptureScreen.this,"Saving Data",
-                "Saving markers, please wait...", false, false);
-        progressDialog.show();
-        storeMarkerList(markerList);
-        markerList = retrieveMarkerList();
-        progressDialog.dismiss();
+        fm.setMarkerList(markerList);
+        fm.storeMarkerList();
+        markerList = fm.retrieveMarkerList();
         super.onPause();
     }
+
+    @Override
+    protected void onStop(){
+        fm.setMarkerList(markerList);
+        fm.storeMarkerList();
+        markerList = fm.retrieveMarkerList();
+        super.onStop();
+    }
+
 
 
     /**
@@ -160,32 +159,5 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
         progressDialog.dismiss();
-    }
-
-    public void storeMarkerList(ArrayList<MarkerData> markerList){
-        try{
-            File del = new File(root + "/" + currDay + ".tmp");
-            del.delete();
-            FileOutputStream fos = new FileOutputStream(root + "/" + currDay + ".tmp");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(markerList);
-            oos.close();
-        } catch(Exception e){
-            Log.d(TAG, "File creation error!");
-        }
-    }
-
-    public ArrayList<MarkerData> retrieveMarkerList(){
-        try{
-            FileInputStream fis = new FileInputStream(root + "/" + currDay + ".tmp");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            ArrayList<MarkerData> markers = (ArrayList<MarkerData>) ois.readObject();
-            ois.close();
-            return markers;
-        } catch(Exception e){
-            Log.d(TAG, "File retrieval error!");
-            ArrayList<MarkerData> markers = new ArrayList<>();
-            return markers;
-        }
     }
 }
