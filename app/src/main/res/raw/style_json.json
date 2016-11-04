@@ -32,23 +32,6 @@
     ]
   },
   {
-    "featureType": "administrative",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
     "featureType": "administrative.land_parcel",
     "stylers": [
       {
@@ -70,22 +53,6 @@
     "stylers": [
       {
         "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape.man_made",
-    "stylers": [
-      {
-        "visibility": "simplified"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape.natural",
-    "stylers": [
-      {
-        "visibility": "on"
       }
     ]
   },
@@ -157,14 +124,6 @@
     "stylers": [
       {
         "color": "#9ca5b3"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "stylers": [
-      {
-        "color": "#ffeb3b"
       }
     ]
   },

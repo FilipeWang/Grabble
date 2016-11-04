@@ -1,7 +1,10 @@
 package com.filipewang.grabble;
 
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
@@ -9,10 +12,14 @@ import android.util.Log;
 import android.view.View;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -20,13 +27,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 
 
-public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback{
+public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
     private FileManager fm;
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
-    private int [] letterCount;
+    private int[] letterCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +47,24 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         fm = new FileManager();
         letterCount = fm.retrieveLetters();
-        if(letterCount == null)
+        if (letterCount == null)
             letterCount = new int[26];
         markerList = fm.retrieveMarkerList();
         fm.setMarkerList(markerList);
         fm.storeMarkerList();
         fm.storeLetters(letterCount);
 
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
         mapFragment.getMapAsync(this);
 
-        FloatingActionButton b1 = (FloatingActionButton) findViewById(R.id.floating1);
+        FloatingActionButton b1 = (FloatingActionButton) findViewById(R.id.floatingInventory);
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,17 +79,28 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    protected void onResume(){
+    protected void onStart(){
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+    @Override
+    protected void onResume() {
         markerList = fm.retrieveMarkerList();
         letterCount = fm.retrieveLetters();
         super.onResume();
     }
 
     @Override
-    protected void onRestart(){
+    protected void onRestart() {
         markerList = fm.retrieveMarkerList();
         letterCount = fm.retrieveLetters();
         super.onRestart();
+    }
+
+    @Override
+    protected void onStop(){
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     /**
@@ -95,27 +123,36 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         this, R.raw.style_json));
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
+        mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
-
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                String point = marker.getSnippet();
-                marker.remove();
-                int index = -1;
-                for(int i = 0; i<markerList.size(); i++){
-                    if(markerList.get(i).name.equals(point)){
-                        index = i;
-                        i = markerList.size();
+                boolean close = checkDistance(marker.getPosition());
+                if(close){
+                    String point = marker.getSnippet();
+                    marker.remove();
+                    int index = -1;
+                    for(int i = 0; i<markerList.size(); i++){
+                        if(markerList.get(i).name.equals(point)){
+                            index = i;
+                            i = markerList.size();
+                        }
                     }
+                    markerList.remove(index);
+                    char c = marker.getTitle().charAt(0);
+                    int numValue = (int) c;
+                    int indexLetter = numValue - 65;
+                    letterCount[indexLetter]++;
+                    new StoreDataMarker().execute(markerList);
+                    new StoreDataLetters().execute(letterCount);
+                }else{
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture),"Too far from the marker!", Snackbar.LENGTH_LONG)
+                            .show();
                 }
-                markerList.remove(index);
-                char c = marker.getTitle().charAt(0);
-                int numValue = (int) c;
-                int indexLetter = numValue - 65;
-                letterCount[indexLetter]++;
-                new StoreDataMarker().execute(markerList);
-                new StoreDataLetters().execute(letterCount);
             }
         });
 
@@ -169,6 +206,18 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
     }
 
+    private boolean checkDistance(LatLng position) {
+        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        Location markerLocation = new Location("Current");
+        markerLocation.setLatitude(position.latitude);
+        markerLocation.setLongitude(position.longitude);
+
+        float diff = currentLocation.distanceTo(markerLocation);
+        int difference = Math.round(diff);
+        return difference < 20;
+    }
+
     public String getLetterCount(){
         String text = "";
         for(int i = 0; i < 26; i++){
@@ -178,6 +227,22 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         }
         return text;
     }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
 
     class StoreDataMarker extends AsyncTask<ArrayList<MarkerData>, Void, Boolean> {
 

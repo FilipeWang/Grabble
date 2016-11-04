@@ -18,8 +18,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainScreen"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,12 +28,10 @@
         <activity
             android:name=".SettingsScreen"
             android:label="@string/title_activity_settings_screen"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".InfoScreen"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:screenOrientation="portrait"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -50,8 +47,7 @@
         <activity
             android:name=".CaptureScreen"
             android:label="@string/title_activity_capture_screen"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.filipewang.grabble"
         minSdkVersion 21
-        targetSdkVersion 24
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
