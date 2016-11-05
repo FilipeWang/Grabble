@@ -1,5 +1,6 @@
 package com.filipewang.grabble;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -76,6 +77,14 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 dialog.show();
             }
         });
+
+        FloatingActionButton b2 = (FloatingActionButton) findViewById(R.id.floatingLeaderboards);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(CaptureScreen.this,LeaderboardScreen.class));
+            }
+        });
     }
 
     @Override
@@ -127,7 +136,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
         mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -203,19 +212,27 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     .show();
         }
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(0).getCoordinates(),20));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(55.94400,-3.192473),19));
+
     }
 
     private boolean checkDistance(LatLng position) {
-        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
+        Location currentLocation = getCurrentLocation();
         Location markerLocation = new Location("Current");
-        markerLocation.setLatitude(position.latitude);
-        markerLocation.setLongitude(position.longitude);
+        if(currentLocation != null){
+            markerLocation.setLatitude(position.latitude);
+            markerLocation.setLongitude(position.longitude);
 
-        float diff = currentLocation.distanceTo(markerLocation);
-        int difference = Math.round(diff);
-        return difference < 20;
+            float diff = currentLocation.distanceTo(markerLocation);
+            int difference = Math.round(diff);
+            return difference < 20;
+        }
+        return false;
+    }
+
+    private Location getCurrentLocation(){
+        return LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
     }
 
     public String getLetterCount(){

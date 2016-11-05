@@ -10,6 +10,7 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -27,4 +28,5 @@ dependencies {
     compile 'com.android.support:design:24.1.1'
     compile 'com.google.android.gms:play-services:9.6.1'
     compile 'com.github.clans:fab:1.6.4'
+    compile project(path: ':BaseGameUtils')
 }
