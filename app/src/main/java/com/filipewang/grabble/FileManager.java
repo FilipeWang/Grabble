@@ -27,6 +27,7 @@ public class FileManager {
     private String TAG = "FileManager";
     private CalendarManager cm;
     private ArrayList<MarkerData> markerList;
+    private int [] letterCount;
 
     public FileManager(){
         cm = new CalendarManager();
@@ -36,6 +37,7 @@ public class FileManager {
     public void setMarkerList(ArrayList<MarkerData> temp){
         markerList = temp;
     }
+    public void setLetterCount(int [] temp){ letterCount = temp; }
 
     public void storeMarkerList(){
         try{
@@ -78,13 +80,13 @@ public class FileManager {
         }
     }
 
-    public void storeLetters(int [] letters){
+    public void storeLetters(){
         try{
             File del = new File(root + "/data.dat");
             del.delete();
             FileOutputStream fos = new FileOutputStream(root + "/data.dat");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(letters);
+            oos.writeObject(letterCount);
             oos.close();
         } catch(Exception e){
             Log.d(TAG, "File creation error!");
@@ -125,5 +127,17 @@ public class FileManager {
             Log.d(TAG, "Error parsing KML");
         }
         return markerList;
+    }
+
+    public String getLetterCount() {
+        String text = "";
+        for (int i = 1; i < 27; i++) {
+            if (i > 1 && (i - 1) % 5 == 0)
+                text = text + "\n\n";
+            text = text + Character.toString((char) (i + 64)) + ":  " + letterCount[i] + "     ";
+        }
+        text = text + "\n\n\nTotal letters collected: " + letterCount[0];
+        Log.d(TAG,text);
+        return text;
     }
 }

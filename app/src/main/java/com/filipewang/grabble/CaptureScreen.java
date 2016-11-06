@@ -74,8 +74,9 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             letterCount = new int[27];
         markerList = fm.retrieveMarkerList();
         fm.setMarkerList(markerList);
+        fm.setLetterCount(letterCount);
         fm.storeMarkerList();
-        fm.storeLetters(letterCount);
+        fm.storeLetters();
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -237,7 +238,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         switch (view.getId()) {
             case R.id.floatingInventory:
                 AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
-                String currentInventory = getLetterCount();
+                fm.setLetterCount(letterCount);
+                String currentInventory = fm.getLetterCount();
                 builder.setMessage(currentInventory)
                 .setTitle("Letter Inventory");
                 AlertDialog dialog = builder.create();
@@ -424,18 +426,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 mGoogleApiClient);
     }
 
-    public String getLetterCount() {
-        String text = "";
-        for (int i = 1; i < 27; i++) {
-            if (i > 1 && (i - 1) % 5 == 0)
-                text = text + "\n\n";
-            text = text + Character.toString((char) (i + 64)) + ":  " + letterCount[i] + "     ";
-        }
-        text = text + "\n\n\nTotal letters collected: " + letterCount[0];
-        Log.d(TAG,text);
-        return text;
-    }
-
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG,"Changed");
@@ -484,7 +474,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         protected Boolean doInBackground(int[]... arrays) {
             try {
                 FileManager fm = new FileManager();
-                fm.storeLetters(arrays[0]);
+                fm.setLetterCount(arrays[0]);
+                fm.storeLetters();
                 return true;
             } catch (Exception e) {
                 return false;
