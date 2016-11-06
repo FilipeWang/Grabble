@@ -3,9 +3,12 @@ package com.filipewang.grabble;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameUtils;
@@ -14,12 +17,14 @@ public class LeaderboardScreen extends AppCompatActivity implements GoogleApiCli
         GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
 
     private static int RC_SIGN_IN = 9001;
+    private static int LEADERBOARD = 1000;
 
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInflow = true;
     private boolean mSignInClicked = false;
     boolean mExplicitSignOut = false;
     boolean mInSignInFlow = false;
+    private String TAG = "LeaderboardScreen";
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -32,8 +37,18 @@ public class LeaderboardScreen extends AppCompatActivity implements GoogleApiCli
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
+                .setViewForPopups(findViewById(android.R.id.content))
                 // add other APIs and scopes here as needed
                 .build();
+
+        Button buttonLeaderboard = (Button) findViewById(R.id.buttonShowLeader);
+        SignInButton buttonSignin = (SignInButton) findViewById(R.id.buttonSignin2);
+        Button buttonSignout = (Button) findViewById(R.id.buttonSignout);
+
+        buttonLeaderboard.setOnClickListener(this);
+        buttonSignin.setOnClickListener(this);
+        buttonSignout.setOnClickListener(this);
+
     }
 
     @Override
@@ -84,7 +99,7 @@ public class LeaderboardScreen extends AppCompatActivity implements GoogleApiCli
             mSignInClicked = true;
             mGoogleApiClient.connect();
         }
-        else if (view.getId() == R.id.sign_out_button) {
+        else if (view.getId() == R.id.buttonSignout) {
             // user explicitly signed out, so turn off auto sign in
             mExplicitSignOut = true;
             if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
@@ -92,26 +107,27 @@ public class LeaderboardScreen extends AppCompatActivity implements GoogleApiCli
                 mGoogleApiClient.disconnect();
             }
             // show sign-in button, hide the sign-out button
-            findViewById(R.id.buttonSignin).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_button).setVisibility(View.GONE);
-        } else if (view.getId() == R.id.buttonShow){
+            findViewById(R.id.buttonSignin2).setVisibility(View.VISIBLE);
+            findViewById(R.id.buttonSignout).setVisibility(View.GONE);
+        } else if (view.getId() == R.id.buttonShowLeader){
             FileManager fm = new FileManager();
             int [] letters = fm.retrieveLetters();
             int sum = 0;
             for (int letter : letters) {
                 sum = sum + letter;
             }
-            Games.Leaderboards.submitScore(mGoogleApiClient, "CgkI9IP3yPwaEAIQAA", sum);
+            Log.d(TAG,"Sum: " + sum);
+            Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), sum);
             startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
-                    "CgkI9IP3yPwaEAIQAA"), 1000);
+                    getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
         }
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
         // show sign-out button, hide the sign-in button
-        findViewById(R.id.buttonSignin).setVisibility(View.GONE);
-        findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.buttonSignin2).setVisibility(View.GONE);
+        findViewById(R.id.buttonSignout).setVisibility(View.VISIBLE);
 
         // (your code here: update UI, enable functionality that depends on sign in, etc)
     }
@@ -137,9 +153,11 @@ public class LeaderboardScreen extends AppCompatActivity implements GoogleApiCli
                 BaseGameUtils.showActivityResultError(this,
                         requestCode, resultCode, R.string.signin_failure);
             }
+        } else if(requestCode == LEADERBOARD){
+            if(intent != null)
+                startActivity(intent);
         }
-
-
+        super.onActivityResult(requestCode,resultCode,intent);
     }
 
 }

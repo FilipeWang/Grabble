@@ -82,6 +82,7 @@ public class MainScreen extends AppCompatActivity {
         wordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                startActivity(new Intent(MainScreen.this,LeaderboardScreen.class));
             }
         });
 

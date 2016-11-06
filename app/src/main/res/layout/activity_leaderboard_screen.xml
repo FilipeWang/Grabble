@@ -16,10 +16,10 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="75dp"
-        android:id="@+id/buttonSignin" />
+        android:id="@+id/buttonSignin2" />
 
     <Button
-        android:id="@+id/sign_out_button"
+        android:id="@+id/buttonSignout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -32,8 +32,7 @@
         android:text="Show Leaderboard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/buttonSignin"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="151dp"
-        android:id="@+id/buttonShow" />
+        android:id="@+id/buttonShowLeader"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

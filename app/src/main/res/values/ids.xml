@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Google Play game services IDs.
+Save this file as res/values/games-ids.xml in your project.
+-->
+<resources>
+    <string name="app_id">926792139252</string>
+    <string name="package_name">com.filipewang.grabble</string>
+    <string name="achievement_open_grabble">CgkI9IP3yPwaEAIQAg</string>
+    <string name="achievement_collect_your_first_letter">CgkI9IP3yPwaEAIQAw</string>
+    <string name="achievement_create_a_word">CgkI9IP3yPwaEAIQBA</string>
+    <string name="achievement_open_the_settings_screen">CgkI9IP3yPwaEAIQBQ</string>
+    <string name="achievement_where_am_i">CgkI9IP3yPwaEAIQBg</string>
+    <string name="leaderboard_grabble">CgkI9IP3yPwaEAIQAA</string>
+</resources>

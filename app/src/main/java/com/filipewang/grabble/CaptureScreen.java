@@ -1,5 +1,6 @@
 package com.filipewang.grabble;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -12,9 +13,9 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 
-import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.games.Games;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,19 +25,34 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.example.games.basegameutils.BaseGameUtils;
 
 import java.util.ArrayList;
 
 
 public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        View.OnClickListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+
     private FileManager fm;
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
     private int[] letterCount;
+    private final static int[] BUTTONS = {
+            R.id.floatingInventory, R.id.floatingLeaderboards,
+            R.id.buttonSignin
+    };
+
+    private static int RC_SIGN_IN = 9001;
+    private static int LEADERBOARD = 1000;
+
+    private boolean mResolvingConnectionFailure = false;
+    private boolean mAutoStartSignInflow = true;
+    private boolean mSignInClicked = false;
+    private boolean showSignin = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,38 +76,24 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .addApi(Games.API).addScope(Games.SCOPE_GAMES)
+                    .setViewForPopups(findViewById(android.R.id.content))
                     .build();
         }
 
         mapFragment.getMapAsync(this);
 
-        FloatingActionButton b1 = (FloatingActionButton) findViewById(R.id.floatingInventory);
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
-                String currentInventory = getLetterCount();
-                builder.setMessage(currentInventory)
-                        .setTitle("Letter Inventory");
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
-
-        FloatingActionButton b2 = (FloatingActionButton) findViewById(R.id.floatingLeaderboards);
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(CaptureScreen.this,LeaderboardScreen.class));
-            }
-        });
+        for (int id : BUTTONS) {
+            findViewById(id).setOnClickListener(this);
+        }
     }
 
     @Override
-    protected void onStart(){
-        mGoogleApiClient.connect();
+    protected void onStart() {
         super.onStart();
+        mGoogleApiClient.connect();
     }
+
     @Override
     protected void onResume() {
         markerList = fm.retrieveMarkerList();
@@ -107,10 +109,120 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
     }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        findViewById(R.id.buttonSignin).setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        findViewById(R.id.buttonSignin).setVisibility(View.VISIBLE);
+        if (mResolvingConnectionFailure) {
+            // already resolving
+            return;
+        }
+
+        // if the sign-in button was clicked or if auto sign-in is enabled,
+        // launch the sign-in flow
+        if (mSignInClicked || mAutoStartSignInflow) {
+            mAutoStartSignInflow = false;
+            mSignInClicked = false;
+            mResolvingConnectionFailure = true;
+
+            // Attempt to resolve the connection failure using BaseGameUtils.
+            // The R.string.signin_other_error value should reference a generic
+            // error string in your strings.xml file, such as "There was
+            // an issue with sign-in, please try again later."
+            if (!BaseGameUtils.resolveConnectionFailure(this,
+                    mGoogleApiClient, connectionResult,
+                    RC_SIGN_IN, "Error")) {
+                mResolvingConnectionFailure = false;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent intent) {
+        if (requestCode == RC_SIGN_IN) {
+            mSignInClicked = false;
+            mResolvingConnectionFailure = false;
+            if (resultCode == RESULT_OK) {
+                mGoogleApiClient.connect();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
+                builder.setMessage("Player not signed in, moving to Main Screen...")
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        startActivity(new Intent(CaptureScreen.this,MainScreen.class));
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        } else if (requestCode == LEADERBOARD) {
+            if (intent != null)
+                startActivity(intent);
+        }
+
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.floatingInventory:
+                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
+                String currentInventory = getLetterCount();
+                builder.setMessage(currentInventory)
+                        .setTitle("Letter Inventory");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                break;
+            case R.id.floatingLeaderboards:
+                try {
+                    FileManager fm = new FileManager();
+                    int[] letters = fm.retrieveLetters();
+                    int sum = 0;
+                    for (int letter : letters) {
+                        sum = sum + letter;
+                    }
+                    Log.d(TAG, "Sum: " + sum);
+                    Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), sum);
+                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
+                            getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
+                } catch (Exception e) {
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(CaptureScreen.this);
+                    builder2.setMessage("Player not signed in, moving to Main Screen...")
+                            .setCancelable(false)
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivity(new Intent(CaptureScreen.this,MainScreen.class));
+                                }
+                            });
+                    AlertDialog dialog2 = builder2.create();
+                    dialog2.show();
+                }
+                break;
+            case R.id.buttonSignin:
+                mGoogleApiClient.reconnect();
+                break;
+        }
+    }
+
 
     /**
      * Manipulates the map once available.
@@ -141,12 +253,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onInfoWindowClick(Marker marker) {
                 boolean close = checkDistance(marker.getPosition());
-                if(close){
+                if (close) {
                     String point = marker.getSnippet();
                     marker.remove();
                     int index = -1;
-                    for(int i = 0; i<markerList.size(); i++){
-                        if(markerList.get(i).name.equals(point)){
+                    for (int i = 0; i < markerList.size(); i++) {
+                        if (markerList.get(i).name.equals(point)) {
                             index = i;
                             i = markerList.size();
                         }
@@ -158,8 +270,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     letterCount[indexLetter]++;
                     new StoreDataMarker().execute(markerList);
                     new StoreDataLetters().execute(letterCount);
-                }else{
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture),"Too far from the marker!", Snackbar.LENGTH_LONG)
+                } else {
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Too far from the marker!", Snackbar.LENGTH_LONG)
                             .show();
                 }
             }
@@ -200,26 +312,26 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         //Set max zoom out
         //mMap.setMinZoomPreference(17);
 
-        try{
-            for(MarkerData curr: markerList){
+        try {
+            for (MarkerData curr : markerList) {
                 mMap.addMarker(new MarkerOptions()
                         .position(curr.getCoordinates())
                         .title(curr.letter)
                         .snippet(curr.name));
             }
-        } catch (Exception e){
-            Snackbar.make(findViewById(R.id.coordinatorLayoutCapture),"No more letters for today!", Snackbar.LENGTH_LONG)
+        } catch (Exception e) {
+            Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No more letters for today!", Snackbar.LENGTH_LONG)
                     .show();
         }
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(55.94400,-3.192473),19));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(55.94400, -3.192473), 19));
 
     }
 
     private boolean checkDistance(LatLng position) {
         Location currentLocation = getCurrentLocation();
         Location markerLocation = new Location("Current");
-        if(currentLocation != null){
+        if (currentLocation != null) {
             markerLocation.setLatitude(position.latitude);
             markerLocation.setLongitude(position.longitude);
 
@@ -230,34 +342,19 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         return false;
     }
 
-    private Location getCurrentLocation(){
+    private Location getCurrentLocation() {
         return LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
     }
 
-    public String getLetterCount(){
+    public String getLetterCount() {
         String text = "";
-        for(int i = 0; i < 26; i++){
-            if(i > 0 && i % 5 == 0)
+        for (int i = 0; i < 26; i++) {
+            if (i > 0 && i % 5 == 0)
                 text = text + "\n";
             text = text + Character.toString((char) (i + 65)) + ": " + letterCount[i] + "     ";
         }
         return text;
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
 
@@ -265,39 +362,39 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         @Override
         protected Boolean doInBackground(ArrayList<MarkerData>... arrayLists) {
-            try{
+            try {
                 FileManager fm = new FileManager();
                 fm.setMarkerList(arrayLists[0]);
                 fm.storeMarkerList();
                 return true;
-            } catch(Exception e){
+            } catch (Exception e) {
                 return false;
             }
         }
 
         @Override
         protected void onPostExecute(Boolean flag) {
-            if(!flag)
+            if (!flag)
                 Log.d(TAG, "Error in storing data!");
         }
     }
 
-    class StoreDataLetters extends AsyncTask<int [], Void, Boolean> {
+    class StoreDataLetters extends AsyncTask<int[], Void, Boolean> {
 
         @Override
-        protected Boolean doInBackground(int []... arrays) {
-            try{
+        protected Boolean doInBackground(int[]... arrays) {
+            try {
                 FileManager fm = new FileManager();
                 fm.storeLetters(arrays[0]);
                 return true;
-            } catch(Exception e){
+            } catch (Exception e) {
                 return false;
             }
         }
 
         @Override
         protected void onPostExecute(Boolean flag) {
-            if(!flag)
+            if (!flag)
                 Log.d(TAG, "Error in storing data!");
         }
     }
