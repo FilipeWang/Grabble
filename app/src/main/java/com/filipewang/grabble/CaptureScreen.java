@@ -2,6 +2,7 @@ package com.filipewang.grabble;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,11 +17,15 @@ import android.view.View;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -32,10 +37,11 @@ import java.util.ArrayList;
 
 public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener {
+        View.OnClickListener, LocationSource.OnLocationChangedListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+    private Circle currCircle;
 
     private FileManager fm;
     private String TAG = "CaptureScreen";
@@ -43,16 +49,16 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private int[] letterCount;
     private final static int[] BUTTONS = {
             R.id.floatingInventory, R.id.floatingLeaderboards,
-            R.id.buttonSignin
+            R.id.floatingAchievements
     };
 
     private static int RC_SIGN_IN = 9001;
     private static int LEADERBOARD = 1000;
+    private static int ACHIEVEMENTS = 1001;
 
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInflow = true;
     private boolean mSignInClicked = false;
-    private boolean showSignin = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +122,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        findViewById(R.id.buttonSignin).setVisibility(View.GONE);
     }
 
     @Override
@@ -126,7 +131,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        findViewById(R.id.buttonSignin).setVisibility(View.VISIBLE);
         if (mResolvingConnectionFailure) {
             // already resolving
             return;
@@ -161,9 +165,15 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 mGoogleApiClient.connect();
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
-                builder.setMessage("Player not signed in, moving to Main Screen...")
+                builder.setMessage("Player not signed in, proceed without access to leaderboard or achievement screens?")
                 .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         startActivity(new Intent(CaptureScreen.this,MainScreen.class));
@@ -173,10 +183,52 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 dialog.show();
             }
         } else if (requestCode == LEADERBOARD) {
-            if (intent != null)
-                startActivity(intent);
+            if (resultCode == GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
+                builder.setMessage("Player not signed in, proceed without access to leaderboard or achievement screens?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                startActivity(new Intent(CaptureScreen.this,MainScreen.class));
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else {
+                if (intent != null)
+                    startActivity(intent);
+            }
+        } else if(requestCode == ACHIEVEMENTS){
+            if (resultCode == GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
+                builder.setMessage("Player not signed in, proceed without access to leaderboard or achievement screens?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                startActivity(new Intent(CaptureScreen.this,MainScreen.class));
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else {
+                if (intent != null)
+                    startActivity(intent);
+            }
         }
-
 
     }
 
@@ -205,20 +257,49 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                             getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
                 } catch (Exception e) {
                     AlertDialog.Builder builder2 = new AlertDialog.Builder(CaptureScreen.this);
-                    builder2.setMessage("Player not signed in, moving to Main Screen...")
+                    builder2.setMessage("Player not signed in, cannot access leaderboards. \nDo you want to restart capture mode?")
                             .setCancelable(false)
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    startActivity(new Intent(CaptureScreen.this,MainScreen.class));
+                                    finish();
+                                    startActivity(new Intent(CaptureScreen.this,CaptureScreen.class));
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
                                 }
                             });
                     AlertDialog dialog2 = builder2.create();
                     dialog2.show();
                 }
                 break;
-            case R.id.buttonSignin:
-                mGoogleApiClient.reconnect();
+            case R.id.floatingAchievements:
+                try {
+                    startActivityForResult(Games.Achievements.getAchievementsIntent(mGoogleApiClient),
+                            ACHIEVEMENTS);
+                } catch (Exception e) {
+                    AlertDialog.Builder builder3 = new AlertDialog.Builder(CaptureScreen.this);
+                    builder3.setMessage("Player not signed in, cannot access achievements. \nDo you want to restart capture mode?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    finish();
+                                    startActivity(new Intent(CaptureScreen.this,CaptureScreen.class));
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            });
+                    AlertDialog dialog3 = builder3.create();
+                    dialog3.show();
+                }
                 break;
         }
     }
@@ -331,6 +412,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private boolean checkDistance(LatLng position) {
         Location currentLocation = getCurrentLocation();
         Location markerLocation = new Location("Current");
+        drawBoundary(currentLocation);
         if (currentLocation != null) {
             markerLocation.setLatitude(position.latitude);
             markerLocation.setLongitude(position.longitude);
@@ -355,6 +437,26 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             text = text + Character.toString((char) (i + 65)) + ": " + letterCount[i] + "     ";
         }
         return text;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.d(TAG,"Changed");
+        drawBoundary(location);
+    }
+
+    private void drawBoundary(Location location){
+        Log.d(TAG,"Draw");
+        if(location != null){
+            if(currCircle != null)
+                currCircle.remove();
+            CircleOptions co = new CircleOptions();
+            co.center(new LatLng(location.getLatitude(),location.getLongitude()));
+            co.radius(20);
+            co.strokeColor(Color.RED);
+            co.strokeWidth(4.0f);
+            currCircle = mMap.addCircle(co);
+        }
     }
 
 

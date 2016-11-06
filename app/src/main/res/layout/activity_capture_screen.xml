@@ -56,7 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_menu_white_36dp"
+            android:src="@drawable/ic_format_list_numbered_white_36dp"
             fab:fab_colorNormal="@android:color/transparent"
             fab:fab_colorPressed="@android:color/transparent"
             fab:fab_colorRipple="@android:color/transparent"
@@ -66,18 +66,18 @@
             fab:fab_label="Leaderboards" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/floating3"
+            android:id="@+id/floatingAchievements"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_menu_white_36dp"
+            android:src="@drawable/ic_star_white_36dp"
             fab:fab_colorNormal="@android:color/transparent"
             fab:fab_colorPressed="@android:color/transparent"
             fab:fab_colorRipple="@android:color/transparent"
             fab:fab_showShadow="true"
             fab:fab_shadowColor="@android:color/transparent"
             fab:fab_size="mini"
-            fab:fab_label="Menu item 3" />
+            fab:fab_label="Achievements" />
 
     </com.github.clans.fab.FloatingActionMenu>
 
@@ -89,16 +89,6 @@
         android:layout_marginBottom="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
-    <com.google.android.gms.common.SignInButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:visibility="gone"
-        android:id="@+id/buttonSignin" />
 
 
 </FrameLayout>

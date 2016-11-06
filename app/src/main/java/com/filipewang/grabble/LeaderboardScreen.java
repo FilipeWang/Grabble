@@ -94,12 +94,7 @@ public class LeaderboardScreen extends AppCompatActivity implements GoogleApiCli
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.buttonSignin) {
-            // start the asynchronous sign in flow
-            mSignInClicked = true;
-            mGoogleApiClient.connect();
-        }
-        else if (view.getId() == R.id.buttonSignout) {
+        if (view.getId() == R.id.buttonSignout) {
             // user explicitly signed out, so turn off auto sign in
             mExplicitSignOut = true;
             if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
