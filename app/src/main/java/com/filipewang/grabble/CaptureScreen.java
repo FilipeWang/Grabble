@@ -71,7 +71,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         fm = new FileManager();
         letterCount = fm.retrieveLetters();
         if (letterCount == null)
-            letterCount = new int[26];
+            letterCount = new int[27];
         markerList = fm.retrieveMarkerList();
         fm.setMarkerList(markerList);
         fm.storeMarkerList();
@@ -239,20 +239,14 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
                 String currentInventory = getLetterCount();
                 builder.setMessage(currentInventory)
-                        .setTitle("Letter Inventory");
+                .setTitle("Letter Inventory");
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 break;
             case R.id.floatingLeaderboards:
                 try {
-                    FileManager fm = new FileManager();
-                    int[] letters = fm.retrieveLetters();
-                    int sum = 0;
-                    for (int letter : letters) {
-                        sum = sum + letter;
-                    }
-                    Log.d(TAG, "Sum: " + sum);
-                    Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), sum);
+                    Log.d(TAG,"Letters submitted: " + letterCount[0]);
+                    Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), letterCount[0]);
                     startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
                             getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
                 } catch (Exception e) {
@@ -347,8 +341,9 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     markerList.remove(index);
                     char c = marker.getTitle().charAt(0);
                     int numValue = (int) c;
-                    int indexLetter = numValue - 65;
+                    int indexLetter = numValue - 64;
                     letterCount[indexLetter]++;
+                    letterCount[0]++;
                     new StoreDataMarker().execute(markerList);
                     new StoreDataLetters().execute(letterCount);
                 } else {
@@ -431,11 +426,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     public String getLetterCount() {
         String text = "";
-        for (int i = 0; i < 26; i++) {
-            if (i > 0 && i % 5 == 0)
-                text = text + "\n";
-            text = text + Character.toString((char) (i + 65)) + ": " + letterCount[i] + "     ";
+        for (int i = 1; i < 27; i++) {
+            if (i > 1 && (i - 1) % 5 == 0)
+                text = text + "\n\n";
+            text = text + Character.toString((char) (i + 64)) + ":  " + letterCount[i] + "     ";
         }
+        text = text + "\n\n\nTotal letters collected: " + letterCount[0];
+        Log.d(TAG,text);
         return text;
     }
 
