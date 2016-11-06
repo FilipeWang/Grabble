@@ -28,16 +28,16 @@ public class FileManager {
     private CalendarManager cm;
     private ArrayList<MarkerData> markerList;
     private int [] letterCount;
+    private boolean [] achievements;
 
     public FileManager(){
         cm = new CalendarManager();
         currDay = cm.getCurrentDay();
     }
 
-    public void setMarkerList(ArrayList<MarkerData> temp){
-        markerList = temp;
-    }
+    public void setMarkerList(ArrayList<MarkerData> temp){ markerList = temp; }
     public void setLetterCount(int [] temp){ letterCount = temp; }
+    public void setAchievements(boolean [] temp) { achievements = temp; }
 
     public void storeMarkerList(){
         try{
@@ -93,6 +93,33 @@ public class FileManager {
         }
     }
 
+    public boolean [] retrieveAchievements(){
+        try{
+            FileInputStream fis = new FileInputStream(root + "/achievements.dat");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            boolean [] achievementsFile = (boolean []) ois.readObject();
+            ois.close();
+            return achievementsFile;
+        } catch(Exception e){
+            Log.d(TAG, "File retrieval error!");
+            boolean [] achievementsFile = null;
+            return achievementsFile;
+        }
+    }
+
+    public void storeAchievements(){
+        try{
+            File del = new File(root + "/achievements.dat");
+            del.delete();
+            FileOutputStream fos = new FileOutputStream(root + "/achievements.dat");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(achievements);
+            oos.close();
+        } catch(Exception e){
+            Log.d(TAG, "File creation error!");
+        }
+    }
+
     public ArrayList<MarkerData> parseKmlFile(String fileName){
         File KMLFile = new File(root + "/" + fileName);
         ArrayList<MarkerData> markerList = new ArrayList<>();
@@ -139,5 +166,10 @@ public class FileManager {
         text = text + "\n\n\nTotal letters collected: " + letterCount[0];
         Log.d(TAG,text);
         return text;
+    }
+
+    public void resetMarkers(){
+        File del = new File(root + "/data.dat");
+        del.delete();
     }
 }

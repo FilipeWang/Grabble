@@ -51,7 +51,9 @@
             android:name=".CaptureScreen"
             android:label="@string/title_activity_capture_screen"
             android:screenOrientation="portrait" />
-        <activity android:name=".SettingsScreen"></activity>
+        <activity
+            android:name=".SettingsScreen"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

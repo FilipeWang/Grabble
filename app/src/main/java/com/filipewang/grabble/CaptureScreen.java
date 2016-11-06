@@ -21,7 +21,6 @@ import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
@@ -37,7 +36,7 @@ import java.util.ArrayList;
 
 public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener, LocationSource.OnLocationChangedListener {
+        View.OnClickListener{
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -47,9 +46,10 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
     private int[] letterCount;
+    private boolean[] achievements;
     private final static int[] BUTTONS = {
             R.id.floatingInventory, R.id.floatingLeaderboards,
-            R.id.floatingAchievements
+            R.id.floatingAchievements, R.id.floatingCircle
     };
 
     private static int RC_SIGN_IN = 9001;
@@ -69,14 +69,38 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
 
         fm = new FileManager();
+
+        markerList = fm.retrieveMarkerList();
+        if (markerList == null){
+            fm.resetMarkers();
+            AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
+            builder.setMessage("Error setting up markers. Returning to main screen...")
+                    .setCancelable(false)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            startActivity(new Intent(CaptureScreen.this,MainScreen.class));
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+
         letterCount = fm.retrieveLetters();
         if (letterCount == null)
             letterCount = new int[27];
-        markerList = fm.retrieveMarkerList();
+
+        achievements = fm.retrieveAchievements();
+        if (achievements == null)
+            achievements = new boolean[8];
+
         fm.setMarkerList(markerList);
         fm.setLetterCount(letterCount);
+        fm.setAchievements(achievements);
+
         fm.storeMarkerList();
         fm.storeLetters();
+        fm.storeAchievements();
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -105,6 +129,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     protected void onResume() {
         markerList = fm.retrieveMarkerList();
         letterCount = fm.retrieveLetters();
+        achievements = fm.retrieveAchievements();
         super.onResume();
     }
 
@@ -112,6 +137,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     protected void onRestart() {
         markerList = fm.retrieveMarkerList();
         letterCount = fm.retrieveLetters();
+        achievements = fm.retrieveAchievements();
         super.onRestart();
     }
 
@@ -274,6 +300,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 break;
             case R.id.floatingAchievements:
                 try {
+                    achievements[2] = true;
+                    checkAchievements();
                     startActivityForResult(Games.Achievements.getAchievementsIntent(mGoogleApiClient),
                             ACHIEVEMENTS);
                 } catch (Exception e) {
@@ -295,6 +323,16 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                             });
                     AlertDialog dialog3 = builder3.create();
                     dialog3.show();
+                }
+                break;
+            case R.id.floatingCircle:
+                achievements[3] = true;
+                checkAchievements();
+                if(currCircle == null)
+                    drawBoundary(getCurrentLocation());
+                else{
+                    currCircle.remove();
+                    currCircle = null;
                 }
                 break;
         }
@@ -344,10 +382,22 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     char c = marker.getTitle().charAt(0);
                     int numValue = (int) c;
                     int indexLetter = numValue - 64;
+                    if(c == 'F' && letterCount[indexLetter] == 0)
+                        achievements[6] = true;
+                    if(c == 'W' && letterCount[indexLetter] == 0)
+                        achievements[7] = true;
+                    if(c == 'Z' && letterCount[indexLetter] == 0)
+                        achievements[4] = true;
                     letterCount[indexLetter]++;
                     letterCount[0]++;
+                    if(letterCount[0] > 0){
+                        achievements[0] = true;
+                        if(letterCount[0] > 4)
+                            achievements[1] = true;
+                    }
                     new StoreDataMarker().execute(markerList);
                     new StoreDataLetters().execute(letterCount);
+                    checkAchievements();
                 } else {
                     Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Too far from the marker!", Snackbar.LENGTH_LONG)
                             .show();
@@ -409,7 +459,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private boolean checkDistance(LatLng position) {
         Location currentLocation = getCurrentLocation();
         Location markerLocation = new Location("Current");
-        drawBoundary(currentLocation);
         if (currentLocation != null) {
             markerLocation.setLatitude(position.latitude);
             markerLocation.setLongitude(position.longitude);
@@ -426,12 +475,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 mGoogleApiClient);
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d(TAG,"Changed");
-        drawBoundary(location);
-    }
-
     private void drawBoundary(Location location){
         Log.d(TAG,"Draw");
         if(location != null){
@@ -444,6 +487,29 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             co.strokeWidth(4.0f);
             currCircle = mMap.addCircle(co);
         }
+    }
+
+    private void checkAchievements() {
+        Log.d(TAG,"We're here!");
+        if(achievements[0])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_your_first_letter));
+        if(achievements[1])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_5_letters));
+        if(achievements[2])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_open_the_achievements));
+        if(achievements[3])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_check_your_current_boundary));
+        if(achievements[4])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_one_z));
+        if(achievements[6]){
+            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_collect_one_f_and_one_w), 1);
+            achievements[6] = false;
+        }
+        if(achievements[7]){
+            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_collect_one_f_and_one_w), 1);
+            achievements[7] = false;
+        }
+        new StoreDataAchievements().execute(achievements);
     }
 
 
@@ -476,6 +542,27 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 FileManager fm = new FileManager();
                 fm.setLetterCount(arrays[0]);
                 fm.storeLetters();
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean flag) {
+            if (!flag)
+                Log.d(TAG, "Error in storing data!");
+        }
+    }
+
+    class StoreDataAchievements extends AsyncTask<boolean[], Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(boolean[]... arrays) {
+            try {
+                FileManager fm = new FileManager();
+                fm.setAchievements(arrays[0]);
+                fm.storeAchievements();
                 return true;
             } catch (Exception e) {
                 return false;

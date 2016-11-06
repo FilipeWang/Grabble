@@ -34,6 +34,7 @@
         fab:menu_labels_showShadow="false"
         fab:menu_icon="@drawable/ic_menu_white_36dp"
         fab:menu_labels_singleLine="false"
+        fab:menu_labels_textSize="12sp"
         fab:menu_labels_ellipsize="none"
         fab:menu_labels_position="left">
 
@@ -42,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_sort_by_alpha_white_36dp"
+            android:src="@drawable/ic_sort_by_alpha_white_24dp"
             fab:fab_colorNormal="@android:color/transparent"
             fab:fab_colorPressed="@android:color/transparent"
             fab:fab_colorRipple="@android:color/transparent"
@@ -56,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_format_list_numbered_white_36dp"
+            android:src="@drawable/ic_format_list_numbered_white_24dp"
             fab:fab_colorNormal="@android:color/transparent"
             fab:fab_colorPressed="@android:color/transparent"
             fab:fab_colorRipple="@android:color/transparent"
@@ -70,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_star_white_36dp"
+            android:src="@drawable/ic_star_white_24dp"
             fab:fab_colorNormal="@android:color/transparent"
             fab:fab_colorPressed="@android:color/transparent"
             fab:fab_colorRipple="@android:color/transparent"
@@ -78,6 +79,20 @@
             fab:fab_shadowColor="@android:color/transparent"
             fab:fab_size="mini"
             fab:fab_label="Achievements" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingCircle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_panorama_fish_eye_white_24dp"
+            fab:fab_colorNormal="@android:color/transparent"
+            fab:fab_colorPressed="@android:color/transparent"
+            fab:fab_colorRipple="@android:color/transparent"
+            fab:fab_showShadow="true"
+            fab:fab_shadowColor="@android:color/transparent"
+            fab:fab_size="mini"
+            fab:fab_label="Show/Hide Current Boundary" />
 
     </com.github.clans.fab.FloatingActionMenu>
 
