@@ -6,11 +6,11 @@ Save this file as res/values/games-ids.xml in your project.
 <resources>
     <string name="app_id">926792139252</string>
     <string name="package_name">com.filipewang.grabble</string>
-    <string name="achievement_collect_your_first_letter">CgkI9IP3yPwaEAIQAw</string>
-    <string name="achievement_collect_5_letters">CgkI9IP3yPwaEAIQBA</string>
-    <string name="achievement_open_the_achievements">CgkI9IP3yPwaEAIQAg</string>
-    <string name="achievement_check_your_current_boundary">CgkI9IP3yPwaEAIQBQ</string>
-    <string name="achievement_collect_one_z">CgkI9IP3yPwaEAIQBg</string>
-    <string name="achievement_collect_one_f_and_one_w">CgkI9IP3yPwaEAIQCA</string>
+    <string name="achievement_first">CgkI9IP3yPwaEAIQAw</string>
+    <string name="achievement_four_score">CgkI9IP3yPwaEAIQBA</string>
+    <string name="achievement_found_it">CgkI9IP3yPwaEAIQAg</string>
+    <string name="achievement_how_far_can_you_reach">CgkI9IP3yPwaEAIQBQ</string>
+    <string name="achievement_one_z_why_not">CgkI9IP3yPwaEAIQBg</string>
+    <string name="achievement_a_for_application">CgkI9IP3yPwaEAIQCA</string>
     <string name="leaderboard_grabble">CgkI9IP3yPwaEAIQAA</string>
 </resources>

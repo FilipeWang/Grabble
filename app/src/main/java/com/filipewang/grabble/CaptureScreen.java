@@ -92,7 +92,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         achievements = fm.retrieveAchievements();
         if (achievements == null)
-            achievements = new boolean[8];
+            achievements = new boolean[7];
 
         fm.setMarkerList(markerList);
         fm.setLetterCount(letterCount);
@@ -378,26 +378,16 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                             i = markerList.size();
                         }
                     }
-                    markerList.remove(index);
                     char c = marker.getTitle().charAt(0);
                     int numValue = (int) c;
                     int indexLetter = numValue - 64;
-                    if(c == 'F' && letterCount[indexLetter] == 0)
-                        achievements[6] = true;
-                    if(c == 'W' && letterCount[indexLetter] == 0)
-                        achievements[7] = true;
-                    if(c == 'Z' && letterCount[indexLetter] == 0)
-                        achievements[4] = true;
                     letterCount[indexLetter]++;
                     letterCount[0]++;
-                    if(letterCount[0] > 0){
-                        achievements[0] = true;
-                        if(letterCount[0] > 4)
-                            achievements[1] = true;
-                    }
+                    checkLetterAchievements(c,indexLetter);
+                    checkAchievements();
+                    markerList.remove(index);
                     new StoreDataMarker().execute(markerList);
                     new StoreDataLetters().execute(letterCount);
-                    checkAchievements();
                 } else {
                     Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Too far from the marker!", Snackbar.LENGTH_LONG)
                             .show();
@@ -492,24 +482,30 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private void checkAchievements() {
         Log.d(TAG,"We're here!");
         if(achievements[0])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_your_first_letter));
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_first));
         if(achievements[1])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_5_letters));
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_four_score));
         if(achievements[2])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_open_the_achievements));
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_found_it));
         if(achievements[3])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_check_your_current_boundary));
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_how_far_can_you_reach));
         if(achievements[4])
             Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_one_z));
-        if(achievements[6]){
-            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_collect_one_f_and_one_w), 1);
-            achievements[6] = false;
-        }
-        if(achievements[7]){
-            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_collect_one_f_and_one_w), 1);
-            achievements[7] = false;
-        }
+        if(achievements[5])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_a_for_application));
         new StoreDataAchievements().execute(achievements);
+    }
+
+    private void checkLetterAchievements(char c, int index){
+        if(c == 'A' && letterCount[index] == 0)
+            achievements[5] = true;
+        if(c == 'Z' && letterCount[index] == 0)
+            achievements[4] = true;
+        if(letterCount[0] > 0){
+            achievements[0] = true;
+            if(letterCount[0] > 3)
+                achievements[1] = true;
+        }
     }
 
 
