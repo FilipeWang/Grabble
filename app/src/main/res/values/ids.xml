@@ -12,5 +12,6 @@ Save this file as res/values/games-ids.xml in your project.
     <string name="achievement_how_far_can_you_reach">CgkI9IP3yPwaEAIQBQ</string>
     <string name="achievement_one_z_why_not">CgkI9IP3yPwaEAIQBg</string>
     <string name="achievement_a_for_application">CgkI9IP3yPwaEAIQCA</string>
+    <string name="achievement_one_per_hour_each_day">CgkI9IP3yPwaEAIQCQ</string>
     <string name="leaderboard_grabble">CgkI9IP3yPwaEAIQAA</string>
 </resources>

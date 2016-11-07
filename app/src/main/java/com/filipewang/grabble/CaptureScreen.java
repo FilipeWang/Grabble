@@ -1,9 +1,13 @@
 package com.filipewang.grabble;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -272,57 +276,69 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 dialog.show();
                 break;
             case R.id.floatingLeaderboards:
-                try {
-                    Log.d(TAG,"Letters submitted: " + letterCount[0]);
-                    Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), letterCount[0]);
-                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
-                            getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
-                } catch (Exception e) {
-                    AlertDialog.Builder builder2 = new AlertDialog.Builder(CaptureScreen.this);
-                    builder2.setMessage("Player not signed in, cannot access leaderboards. \nDo you want to restart capture mode?")
-                            .setCancelable(false)
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    finish();
-                                    startActivity(new Intent(CaptureScreen.this,CaptureScreen.class));
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            });
-                    AlertDialog dialog2 = builder2.create();
-                    dialog2.show();
+                boolean internet = checkInternetLocation(1);
+                if(internet){
+                    try {
+                        Log.d(TAG,"Letters submitted: " + letterCount[0]);
+                        Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), letterCount[0]);
+                        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
+                                getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
+                    } catch (Exception e) {
+                        AlertDialog.Builder builder2 = new AlertDialog.Builder(CaptureScreen.this);
+                        builder2.setMessage("Player not signed in, cannot access leaderboards. \nDo you want to restart capture mode?")
+                                .setCancelable(false)
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        finish();
+                                        startActivity(new Intent(CaptureScreen.this,CaptureScreen.class));
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                        AlertDialog dialog2 = builder2.create();
+                        dialog2.show();
+                    }
+                } else{
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No internet!", Snackbar.LENGTH_LONG)
+                            .show();
                 }
                 break;
             case R.id.floatingAchievements:
-                try {
-                    achievements[2] = true;
-                    checkAchievements();
-                    startActivityForResult(Games.Achievements.getAchievementsIntent(mGoogleApiClient),
-                            ACHIEVEMENTS);
-                } catch (Exception e) {
-                    AlertDialog.Builder builder3 = new AlertDialog.Builder(CaptureScreen.this);
-                    builder3.setMessage("Player not signed in, cannot access achievements. \nDo you want to restart capture mode?")
-                            .setCancelable(false)
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    finish();
-                                    startActivity(new Intent(CaptureScreen.this,CaptureScreen.class));
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            });
-                    AlertDialog dialog3 = builder3.create();
-                    dialog3.show();
+                boolean internet2 = checkInternetLocation(1);
+                if(internet2){
+                    try {
+                        achievements[2] = true;
+                        checkAchievements();
+                        startActivityForResult(Games.Achievements.getAchievementsIntent(mGoogleApiClient),
+                                ACHIEVEMENTS);
+                    } catch (Exception e) {
+                        AlertDialog.Builder builder3 = new AlertDialog.Builder(CaptureScreen.this);
+                        builder3.setMessage("Player not signed in, cannot access achievements. \nDo you want to restart capture mode?")
+                                .setCancelable(false)
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        finish();
+                                        startActivity(new Intent(CaptureScreen.this,CaptureScreen.class));
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                });
+                        AlertDialog dialog3 = builder3.create();
+                        dialog3.show();
+                    }
+                }else{
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No internet!", Snackbar.LENGTH_LONG)
+                            .show();
                 }
                 break;
             case R.id.floatingCircle:
@@ -368,7 +384,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onInfoWindowClick(Marker marker) {
                 boolean close = checkDistance(marker.getPosition());
-                if (close) {
+                boolean internetLocation = checkInternetLocation(0);
+                if (close && internetLocation) {
                     String point = marker.getSnippet();
                     marker.remove();
                     int index = -1;
@@ -389,8 +406,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     new StoreDataMarker().execute(markerList);
                     new StoreDataLetters().execute(letterCount);
                 } else {
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Too far from the marker!", Snackbar.LENGTH_LONG)
+                    if(!internetLocation)
+                     Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No internet or location!", Snackbar.LENGTH_LONG)
                             .show();
+                    else
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Too far from the marker!", Snackbar.LENGTH_LONG)
+                                .show();
                 }
             }
         });
@@ -490,9 +511,11 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         if(achievements[3])
             Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_how_far_can_you_reach));
         if(achievements[4])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_collect_one_z));
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_one_z_why_not));
         if(achievements[5])
             Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_a_for_application));
+        if(achievements[6])
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_one_per_hour_each_day));
         new StoreDataAchievements().execute(achievements);
     }
 
@@ -501,11 +524,29 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             achievements[5] = true;
         if(c == 'Z' && letterCount[index] == 0)
             achievements[4] = true;
-        if(letterCount[0] > 0){
+        if(letterCount[0] > 0)
             achievements[0] = true;
-            if(letterCount[0] > 3)
-                achievements[1] = true;
-        }
+        if(letterCount[0] > 3)
+            achievements[1] = true;
+        if(letterCount[0] > 23)
+            achievements[6] = true;
+
+    }
+
+    private boolean checkInternetLocation(int caseNum){
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean gpsLocation = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean networkLocation = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        if(caseNum == 0)
+            return (gpsLocation && networkLocation && isConnected);
+        else
+            return isConnected;
     }
 
 
