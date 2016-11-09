@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="Color1SwitchStyle">
+        <item name="colorControlActivated">#FF99CC00</item>
+        <item name="colorControlNormal">#FFFFFF</item>
+    </style>
+
 </resources>
