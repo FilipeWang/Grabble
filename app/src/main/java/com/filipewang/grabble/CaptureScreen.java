@@ -46,7 +46,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private Circle currCircle;
 
-    private FileManager fm;
+    final private FileManager fm = new FileManager();
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
     private int[] letterCount;
@@ -71,8 +71,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-
-        fm = new FileManager();
 
         markerList = fm.retrieveMarkerList();
         if (markerList == null){

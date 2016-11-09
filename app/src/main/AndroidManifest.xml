@@ -54,6 +54,9 @@
         <activity
             android:name=".SettingsScreen"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".WordScreen"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

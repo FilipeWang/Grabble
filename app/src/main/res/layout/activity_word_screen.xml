@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_word_screen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#242f3e"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.filipewang.grabble.WordScreen">
+
+    <TextView
+        android:id="@+id/wordCreationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="Word Creator"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/letterPoints"
+        android:layout_marginTop="35dp"
+        android:layout_centerHorizontal="true"
+        android:theme="@style/NumberPickerTextColorStyle"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout">
+
+        <NumberPicker
+            android:id="@+id/letterPicker1"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+
+        <NumberPicker
+            android:id="@+id/letterPicker2"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+
+        <NumberPicker
+            android:id="@+id/letterPicker3"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+
+        <NumberPicker
+            android:id="@+id/letterPicker4"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+
+        <NumberPicker
+            android:id="@+id/letterPicker5"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+
+        <NumberPicker
+            android:id="@+id/letterPicker6"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+
+        <NumberPicker
+            android:id="@+id/letterPicker7"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/letterPoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/wordCreationTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/letters" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="45dp"
+        android:textColor="#FFFFFF"
+        android:id="@+id/currentWord" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/currentWord"
+        android:layout_alignStart="@+id/currentWord"
+        android:layout_marginTop="20dp"
+        android:textColor="#FFFFFF"
+        android:id="@+id/currentValue" />
+
+    <Button
+        android:text="Create Word!"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/currentValue"
+        android:layout_alignStart="@+id/currentValue"
+        android:textColor="#FFFFFF"
+        android:background="@android:color/transparent"
+        android:layout_marginTop="20dp"
+        android:id="@+id/createWordButton" />
+
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/coordinatorLayoutWord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/createWordButton"
+        android:paddingBottom="10dp"/>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/menu_labels_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="-10dp"
+        android:layout_marginEnd="-10dp"
+        fab:menu_showShadow="false"
+        fab:menu_backgroundColor="@android:color/transparent"
+        fab:menu_shadowColor="@android:color/transparent"
+        fab:menu_colorNormal="@android:color/transparent"
+        fab:menu_colorPressed="@android:color/transparent"
+        fab:menu_colorRipple="@android:color/transparent"
+        fab:menu_labels_colorNormal="@android:color/transparent"
+        fab:menu_labels_colorPressed="@android:color/transparent"
+        fab:menu_labels_colorRipple="@android:color/transparent"
+        fab:menu_labels_textColor="#FFFFFF"
+        fab:menu_labels_showShadow="false"
+        fab:menu_icon="@drawable/ic_menu_white_36dp"
+        fab:menu_labels_singleLine="false"
+        fab:menu_labels_textSize="12sp"
+        fab:menu_labels_ellipsize="none"
+        fab:menu_labels_position="left">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingInventory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_sort_by_alpha_white_24dp"
+            fab:fab_colorNormal="@android:color/transparent"
+            fab:fab_colorPressed="@android:color/transparent"
+            fab:fab_colorRipple="@android:color/transparent"
+            fab:fab_showShadow="true"
+            fab:fab_shadowColor="@android:color/transparent"
+            fab:fab_size="mini"
+            fab:fab_label="Inventory" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingLeaderboards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_format_list_numbered_white_24dp"
+            fab:fab_colorNormal="@android:color/transparent"
+            fab:fab_colorPressed="@android:color/transparent"
+            fab:fab_colorRipple="@android:color/transparent"
+            fab:fab_showShadow="true"
+            fab:fab_shadowColor="@android:color/transparent"
+            fab:fab_size="mini"
+            fab:fab_label="Leaderboards" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingAchievements"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_star_white_24dp"
+            fab:fab_colorNormal="@android:color/transparent"
+            fab:fab_colorPressed="@android:color/transparent"
+            fab:fab_colorRipple="@android:color/transparent"
+            fab:fab_showShadow="true"
+            fab:fab_shadowColor="@android:color/transparent"
+            fab:fab_size="mini"
+            fab:fab_label="Achievements" />
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+</RelativeLayout>

@@ -19,7 +19,8 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentEnd="@+id/settingsButton"
         android:layout_alignParentStart="@+id/infoButton"
-        android:layout_alignBottom="@+id/infoButton" />
+        android:layout_alignBottom="@+id/infoButton"
+        android:paddingBottom="10dp"/>
 
     <Button
         android:layout_width="wrap_content"
