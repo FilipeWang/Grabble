@@ -151,7 +151,7 @@
         fab:menu_labels_position="left">
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/floatingInventory"
+            android:id="@+id/floatingInventoryWord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
@@ -165,7 +165,7 @@
             fab:fab_label="Inventory" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/floatingLeaderboards"
+            android:id="@+id/floatingLeaderboardsWord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
@@ -179,7 +179,7 @@
             fab:fab_label="Leaderboards" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/floatingAchievements"
+            android:id="@+id/floatingAchievementsWord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"

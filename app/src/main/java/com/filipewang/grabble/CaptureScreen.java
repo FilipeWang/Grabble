@@ -500,21 +500,26 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     private void checkAchievements() {
         Log.d(TAG,"We're here!");
-        if(achievements[0])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_first));
-        if(achievements[1])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_four_score));
-        if(achievements[2])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_found_it));
-        if(achievements[3])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_how_far_can_you_reach));
-        if(achievements[4])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_one_z_why_not));
-        if(achievements[5])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_a_for_application));
-        if(achievements[6])
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_one_per_hour_each_day));
-        new StoreDataAchievements().execute(achievements);
+        try {
+            if (achievements[0])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_first));
+            if (achievements[1])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_four_score));
+            if (achievements[2])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_found_it));
+            if (achievements[3])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_how_far_can_you_reach));
+            if (achievements[4])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_one_z_why_not));
+            if (achievements[5])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_a_for_application));
+            if (achievements[6])
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_one_per_hour_each_day));
+            new StoreDataAchievements().execute(achievements);
+        }catch (Exception e){
+            Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Can't save achievements!", Snackbar.LENGTH_LONG)
+                    .show();
+        }
     }
 
     private void checkLetterAchievements(char c, int index){
