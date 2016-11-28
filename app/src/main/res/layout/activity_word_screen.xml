@@ -105,12 +105,21 @@
         android:textColor="#FFFFFF"
         android:id="@+id/currentValue" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textColor="#FFFFFF"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBaseline="@id/wordCreationTitle"
+        android:id="@+id/currentScore" />
+
     <Button
         android:text="Create Word!"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/currentValue"
-        android:layout_alignStart="@+id/currentValue"
+        android:layout_alignStart="@+id/currentWord"
         android:textColor="#FFFFFF"
         android:background="@android:color/transparent"
         android:layout_marginTop="20dp"
@@ -122,7 +131,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/createWordButton"
+        android:layout_below="@+id/createWordButton"
         android:paddingBottom="10dp"/>
 
     <com.github.clans.fab.FloatingActionMenu

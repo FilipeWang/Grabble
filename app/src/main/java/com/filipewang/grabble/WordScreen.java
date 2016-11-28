@@ -59,6 +59,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
     private String TAG = "WordScreen";
     private TextView currWord;
     private TextView currValue;
+    private TextView currScore;
     private String [] alphabet = {"A","B","C","D","E",
                                     "F","G","H","I","J",
                                     "K","L","M","N","O",
@@ -89,15 +90,10 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         for (int id : BUTTONS) {
             findViewById(id).setOnClickListener(this);
         }
-                /*
-                 SHOW CURR SCORE
-                 int score = pref.getInt("currentScore",0);
-                String message = "Current score: " + score;
-                Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
-                        .show();*/
 
         currWord = (TextView) findViewById(R.id.currentWord);
         currValue = (TextView) findViewById(R.id.currentValue);
+        currScore = (TextView) findViewById(R.id.currentScore);
 
         for (int id : PICKERS) {
             NumberPicker np = (NumberPicker) findViewById(id);
@@ -110,6 +106,9 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         String curr = getCurrentWord();
         currWord.setText("Word: " + curr);
         currValue.setText("Value: " + String.valueOf(getValue(curr)));
+
+        int score = pref.getInt("currentScore",0);
+        currScore.setText(String.valueOf(score));
 
         fm = new FileManager();
         loadDictionary();
@@ -140,16 +139,18 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                     SharedPreferences.Editor edit = pref.edit();
                     edit.putInt("currentScore", newScore);
                     edit.commit();
-                    String message = "Valid word! Added " + wordScore + " points to current score!";
+                    String message = "Valid word! Added " + wordScore + " points!";
                     Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
                             .show();
+                    currScore.setText(String.valueOf(newScore));
                 }else{
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Word Does Not Exist!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Word does not exist!", Snackbar.LENGTH_LONG)
                             .show();
                 }
                 break;
             case R.id.floatingInventoryWord:
                 AlertDialog.Builder builder = new AlertDialog.Builder(WordScreen.this);
+                fm.setLetterCount(fm.retrieveLetters());
                 String currentInventory = fm.getLetterCount();
                 builder.setMessage(currentInventory)
                         .setTitle("Letter Inventory");
@@ -183,7 +184,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                         dialog2.show();
                     }
                 }else{
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No internet!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "No internet!", Snackbar.LENGTH_LONG)
                             .show();
                 }
                 break;
@@ -215,7 +216,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                         dialog3.show();
                     }
                 } else{
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No internet!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "No internet!", Snackbar.LENGTH_LONG)
                             .show();
                 }
                 break;
