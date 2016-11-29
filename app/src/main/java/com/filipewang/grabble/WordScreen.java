@@ -65,9 +65,9 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                                     "K","L","M","N","O",
                                     "P","Q","R","S","T",
                                     "U","V","W","X","Y","Z"};
-    private int [] letterValue = {3,20,13,10,1,15,18,9,5,25,22,11,14,
+    private static int [] letterValue = {3,20,13,10,1,15,18,9,5,25,22,11,14,
                                     6,4,19,24,8,7,2,12,21,17,23,16,26};
-    private ArrayList<String> dictionary;
+    private static ArrayList<String> dictionary;
 
 
     @Override
@@ -132,7 +132,8 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
             case R.id.createWordButton:
                 String curr = getCurrentWord();
                 int wordScore = getValue(curr);
-                if(dictionary.contains(curr.toLowerCase())){
+                boolean checkWordValidity = checkWordValidity(curr.toLowerCase(),dictionary);
+                if(checkWordValidity){
                     int score = pref.getInt("currentScore",0);
                     int newScore = score + wordScore;
                     //CHECK FOR OVERFLOW
@@ -224,6 +225,10 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         }
     }
 
+    public static boolean checkWordValidity(String curr, ArrayList<String> dict) {
+        return dict.contains(curr.toLowerCase());
+    }
+
     @Override
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
         String curr = getCurrentWord();
@@ -240,7 +245,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         return word;
     }
 
-    private int getValue(String word){
+    public static int getValue(String word){
         int value = 0;
         for(int i=0; i<7; i++){
             int numValue = (int) word.charAt(i);
