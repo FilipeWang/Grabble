@@ -13,8 +13,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,35 +22,34 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
-public class MainScreen extends AppCompatActivity {
+public class MainScreen extends AppCompatActivity implements View.OnClickListener{
 
     private ProgressDialog progressDialog;
+    private final static int[] BUTTONS = {
+            R.id.settingsButton, R.id.infoButton,
+            R.id.mainCapture, R.id.mainWord
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        ImageButton settingsButton = (ImageButton) findViewById(R.id.settingsButton);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        for (int id : BUTTONS) {
+            findViewById(id).setOnClickListener(this);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch(view.getId()){
+            case R.id.settingsButton:
                 startActivity(new Intent(MainScreen.this, SettingsScreen.class));
-            }
-        });
-
-        ImageButton infoButton = (ImageButton) findViewById(R.id.infoButton);
-        infoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                break;
+            case R.id.infoButton:
                 startActivity(new Intent(MainScreen.this, InfoScreen.class));
-            }
-        });
-
-        Button captureButton = (Button) findViewById(R.id.mainCapture);
-        captureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                break;
+            case R.id.mainCapture:
                 ConnectivityManager cm =
                         (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -75,28 +72,22 @@ public class MainScreen extends AppCompatActivity {
                     String currDay = test.getCurrentDay();
                     new DownloadMapData().execute(currDayWeek, currDay);
                 }
-            }
-        });
-
-        Button wordButton = (Button) findViewById(R.id.mainWord);
-        wordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ConnectivityManager cm =
+                break;
+            case R.id.mainWord:
+                ConnectivityManager cm2 =
                         (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                boolean isConnected = activeNetwork != null &&
-                        activeNetwork.isConnectedOrConnecting();
+                NetworkInfo activeNetwork2 = cm2.getActiveNetworkInfo();
+                boolean isConnected2 = activeNetwork2 != null &&
+                        activeNetwork2.isConnectedOrConnecting();
 
-                if (!isConnected) {
+                if (!isConnected2) {
                     Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Connect to the internet!", Snackbar.LENGTH_LONG)
                             .show();
                 } else {
                     startActivity(new Intent(MainScreen.this,WordScreen.class));
                 }
-            }
-        });
-
+                break;
+        }
     }
 
 
