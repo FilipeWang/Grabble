@@ -22,23 +22,77 @@ import static org.junit.Assert.assertEquals;
 public class UnitTests {
 
     // Testing different words in the dictionary against their calculated values
+    // We use words that cover the whole alphabet
+
+    //3+3+8+4+6+5+13 = 42
     @Test
     public void checkWordValue_AARONIC() throws Exception{assertEquals(42,WordScreen.getValue("AARONIC"));}
 
+    // 3+20+5+11+5+2+6 = 52
     @Test
     public void checkWordValue_ABILITY() throws Exception{assertEquals(62,WordScreen.getValue("ABILITY"));}
 
+    // 20+4+11+2+3+18+1 = 59
     @Test
     public void checkWordValue_BOLTAGE() throws Exception{assertEquals(59,WordScreen.getValue("BOLTAGE"));}
 
+    // 15+8+3+6+13+1+7 = 53
     @Test
     public void checkWordValue_FRANCES() throws Exception{assertEquals(53,WordScreen.getValue("FRANCES"));}
 
+    // 19+3+1+4+6+5+13 = 51
     @Test
     public void checkWordValue_PAEONIC() throws Exception{assertEquals(51,WordScreen.getValue("PAEONIC"));}
 
+    // 7+1+8+19+1+6+2 = 44
     @Test
     public void checkWordValue_SERPENT() throws Exception{assertEquals(44,WordScreen.getValue("SERPENT"));}
+
+    // 18+4+10+9+1+3+10 = 55
+    @Test
+    public void checkWordValue_GODHEAD() throws Exception{assertEquals(55,WordScreen.getValue("GODHEAD"));}
+
+    // 9+12+21+1+11+16+22 = 92
+    @Test
+    public void checkWordValue_HUVELYK() throws Exception{assertEquals(92,WordScreen.getValue("HUVELYK"));}
+
+    // 26+4+4+2+3+23+16 = 78
+    @Test
+    public void checkWordValue_ZOOTAXY() throws Exception{assertEquals(78,WordScreen.getValue("ZOOTAXY"));}
+
+    // 17+5+13+9+2+25+1 = 72
+    @Test
+    public void checkWordValue_WICHTJE() throws Exception{assertEquals(72,WordScreen.getValue("WICHTJE"));}
+
+    // 24+12+3+1+10+3+14 = 67
+    @Test
+    public void checkWordValue_QUAEDAM() throws Exception{assertEquals(67,WordScreen.getValue("QUAEDAM"));}
+
+    // Test that all letters have appeared at least once
+    @Test
+    public void checkWordValue_ALL() throws Exception{
+        String [] wordsTested = {"AARONIC","ABILITY","BOLTAGE","FRANCES","PAEONIC","SERPENT","GODHEAD",
+                                "HUVELYK","ZOOTAXY","WICHTJE","QUAEDAM"};
+        int [] letterCount = new int[26];
+
+        // Calculate character frequency
+        for(String word: wordsTested){
+            for(int i = 0; i<word.length(); i++){
+                char c = word.charAt(i);
+                int numValue = (int) c;
+                int indexLetter = numValue - 65;
+                letterCount[indexLetter]++;
+            }
+        }
+
+        // Check if a letter has not been used
+        boolean flag = true;
+        for(int j: letterCount){
+            if(j == 0)
+                flag = false;
+        }
+        assertTrue(flag);
+    }
 
     /**
      * Checking if a word is valid or not using different inputs.
@@ -105,7 +159,7 @@ public class UnitTests {
      */
 
     @Test
-    public void calendartest_Monday() throws Exception{
+    public void calendarTest_Monday() throws Exception{
         String correctDate = "monday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2016,11,5); //December 5th, 2016
@@ -114,7 +168,7 @@ public class UnitTests {
     }
 
     @Test
-    public void calendartest_Tuesday() throws Exception{
+    public void calendarTest_Tuesday() throws Exception{
         String correctDate = "tuesday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2016,8,6); //Septermber 6th, 2016
@@ -123,7 +177,7 @@ public class UnitTests {
     }
 
     @Test
-    public void calendartest_Wednesday() throws Exception{
+    public void calendarTest_Wednesday() throws Exception{
         String correctDate = "wednesday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2017,5,28); //June 28th, 2017
@@ -133,7 +187,7 @@ public class UnitTests {
 
 
     @Test
-    public void calendartest_Thursday() throws Exception{
+    public void calendarTest_Thursday() throws Exception{
         String correctDate = "thursday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2017,5,29); //June 29th, 2017
@@ -142,7 +196,7 @@ public class UnitTests {
     }
 
     @Test
-    public void calendartest_Friday() throws Exception{
+    public void calendarTest_Friday() throws Exception{
         String correctDate = "friday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2010,1,19); //February 19th, 2010
@@ -151,7 +205,7 @@ public class UnitTests {
     }
 
     @Test
-    public void calendartest_Saturday() throws Exception{
+    public void calendarTest_Saturday() throws Exception{
         String correctDate = "saturday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2022,9,1); //October 1st, 2022
@@ -160,7 +214,7 @@ public class UnitTests {
     }
 
     @Test
-    public void calendartest_Sunday() throws Exception{
+    public void calendarTest_Sunday() throws Exception{
         String correctDate = "sunday";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2016,10,6); //November 6th, 2016
@@ -169,7 +223,7 @@ public class UnitTests {
     }
 
     @Test
-    public void calendartest_Day() throws Exception{
+    public void calendarTest_Day() throws Exception{
         String correctDay = "03122016";
         CalendarManager calendarManager = new CalendarManager();
         calendarManager.cal.set(2016,11,3); //June 28th, 2017
