@@ -54,7 +54,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
             R.id.createWordButton, R.id.floatingInventoryWord
     };
 
-    private FileManager fm;
+    private static FileManager fm;
     private SharedPreferences pref;
     private String TAG = "WordScreen";
     private TextView currWord;
@@ -132,8 +132,11 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
             case R.id.createWordButton:
                 String curr = getCurrentWord();
                 int wordScore = getValue(curr);
-                boolean checkWordValidity = checkWordValidity(curr.toLowerCase(),dictionary);
-                if(checkWordValidity){
+                boolean wordValidity = checkWordValidity(curr.toLowerCase(),dictionary);
+                int [] letterCount = fm.retrieveLetters();
+                boolean inventory = checkInventory(curr,letterCount);
+                if(wordValidity && inventory){
+                    deductFromInventory(curr,letterCount);
                     int score = pref.getInt("currentScore",0);
                     int newScore = score + wordScore;
                     //CHECK FOR OVERFLOW
@@ -145,8 +148,12 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                             .show();
                     currScore.setText(String.valueOf(newScore));
                 }else{
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Word does not exist!", Snackbar.LENGTH_LONG)
-                            .show();
+                    if(wordValidity)
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Not enough letters!", Snackbar.LENGTH_LONG)
+                                .show();
+                    else
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Word does not exist!", Snackbar.LENGTH_LONG)
+                                .show();
                 }
                 break;
             case R.id.floatingInventoryWord:
@@ -227,6 +234,33 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
 
     public static boolean checkWordValidity(String curr, ArrayList<String> dict) {
         return dict.contains(curr.toLowerCase());
+    }
+
+    public static boolean checkInventory(String curr, int [] letterCount){
+        int [] tempCount = letterCount.clone();
+        for(int i = 0; i < curr.length(); i++){
+            char c = curr.charAt(i);
+            int numValue = (int) c;
+            int indexLetter = numValue - 64;
+            tempCount[indexLetter]--;
+        }
+        boolean flag = true;
+        for(int j: tempCount){
+            if(j < 0)
+                flag = false;
+        }
+        return flag;
+    }
+
+    private void deductFromInventory(String curr, int [] letterCount){
+        for(int i = 0; i < curr.length(); i++){
+            char c = curr.charAt(i);
+            int numValue = (int) c;
+            int indexLetter = numValue - 64;
+            letterCount[indexLetter]--;
+        }
+        fm.setLetterCount(letterCount);
+        fm.storeLetters();
     }
 
     @Override

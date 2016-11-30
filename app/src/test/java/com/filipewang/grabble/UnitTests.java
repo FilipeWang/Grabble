@@ -17,6 +17,8 @@ import static org.junit.Assert.assertEquals;
  * - Calculate the correct value of a given word
  * - Check whether a word is valid or not
  * - Loading the right map for a given day
+ *
+ * Cases are in this format in the comments: Case caseNum: Description, expected outcome
  */
 
 public class UnitTests {
@@ -153,6 +155,73 @@ public class UnitTests {
     }
 
     /**
+     * Tests with the inventory and word creation.
+     * Case 1: Possible to create the word, return true
+     * Case 2: One letter is missing in the inventory, return false
+     * Case 3: Multiple letters missing, return false
+     * Case 4: All letters missing, return false
+     * Case 5: Word has 2 instances of 1 letter and inventory only has 1, return false
+     * Case 6: Multiple instances of a letter and inventory has them, return true
+     *
+     * The inventory is setup that index 0 is a count of how many letters have been collected
+     * and the rest are the counts for each letter present in the inventory.
+     *
+     * So an inventory, like the one below, has 1 A, 2 B, 3 C, ... , 26 Z.
+     * int [] inventory = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+     */
+    @Test
+    public void inventory_AllPossible() throws Exception{
+        int [] inventory = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+        String word = "WICHTJE";
+        assertTrue(WordScreen.checkInventory(word,inventory));
+    }
+
+    @Test
+    public void inventory_OneMissing() throws Exception{
+
+        // This inventory has no A.
+        int [] inventory = {0,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+        String word = "GODHEAD";
+        assertFalse(WordScreen.checkInventory(word,inventory));
+    }
+
+    @Test
+    public void inventory_SomeMissing() throws Exception{
+
+        // This inventory has no A, E or G.
+        int [] inventory = {0,0,2,3,4,0,6,7,8,0,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+        String word = "PAEONIC";
+        assertFalse(WordScreen.checkInventory(word,inventory));
+    }
+
+    @Test
+    public void inventory_AllMissing() throws Exception{
+
+        // This inventory is empty.
+        int [] inventory = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        String word = "ABILITY";
+        assertFalse(WordScreen.checkInventory(word,inventory));
+    }
+
+    @Test
+    public void inventory_MultipleMissing() throws Exception{
+
+        // This inventory requires 2 A but only has 1.
+        int [] inventory = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+        String word = "AARONIC";
+        assertFalse(WordScreen.checkInventory(word,inventory));
+    }
+
+    @Test
+    public void inventory_MultiplePossible() throws Exception{
+
+        // This inventory has everything needed.
+        int [] inventory = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+        String word = "MILLING";
+        assertTrue(WordScreen.checkInventory(word,inventory));
+    }
+
+    /**
      * Test that the right week day is used for a given day (this ensures the right data)
      * is loaded for the map. Also one test to check if it gets the correct day.
      * Note the set method has the months starting at 0.
@@ -161,27 +230,27 @@ public class UnitTests {
     @Test
     public void calendarTest_Monday() throws Exception{
         String correctDate = "monday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2016,11,5); //December 5th, 2016
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2016,11,5); //December 5th, 2016
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
     @Test
     public void calendarTest_Tuesday() throws Exception{
         String correctDate = "tuesday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2016,8,6); //Septermber 6th, 2016
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2016,8,6); //Septermber 6th, 2016
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
     @Test
     public void calendarTest_Wednesday() throws Exception{
         String correctDate = "wednesday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2017,5,28); //June 28th, 2017
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2017,5,28); //June 28th, 2017
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
@@ -189,45 +258,45 @@ public class UnitTests {
     @Test
     public void calendarTest_Thursday() throws Exception{
         String correctDate = "thursday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2017,5,29); //June 29th, 2017
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2017,5,29); //June 29th, 2017
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
     @Test
     public void calendarTest_Friday() throws Exception{
         String correctDate = "friday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2010,1,19); //February 19th, 2010
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2010,1,19); //February 19th, 2010
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
     @Test
     public void calendarTest_Saturday() throws Exception{
         String correctDate = "saturday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2022,9,1); //October 1st, 2022
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2022,9,1); //October 1st, 2022
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
     @Test
     public void calendarTest_Sunday() throws Exception{
         String correctDate = "sunday";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2016,10,6); //November 6th, 2016
-        String testDate = calendarManager.getDayOfWeek();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2016,10,6); //November 6th, 2016
+        String testDate = cm.getDayOfWeek();
         assertEquals(correctDate,testDate);
     }
 
     @Test
     public void calendarTest_Day() throws Exception{
         String correctDay = "03122016";
-        CalendarManager calendarManager = new CalendarManager();
-        calendarManager.cal.set(2016,11,3); //June 28th, 2017
-        String testDay = calendarManager.getCurrentDay();
+        CalendarManager cm = new CalendarManager();
+        cm.cal.set(2016,11,3); //June 28th, 2017
+        String testDay = cm.getCurrentDay();
         assertEquals(correctDay,testDay);
     }
 }

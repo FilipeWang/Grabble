@@ -61,8 +61,7 @@ public class FileManager {
             return markers;
         } catch(Exception e){
             Log.d(TAG, "File retrieval error!");
-            ArrayList<MarkerData> markers = null;
-            return markers;
+            return null;
         }
     }
 
@@ -75,8 +74,7 @@ public class FileManager {
             return letters;
         } catch(Exception e){
             Log.d(TAG, "File retrieval error!");
-            int [] letters = null;
-            return letters;
+            return null;
         }
     }
 
@@ -102,8 +100,7 @@ public class FileManager {
             return achievementsFile;
         } catch(Exception e){
             Log.d(TAG, "File retrieval error!");
-            boolean [] achievementsFile = null;
-            return achievementsFile;
+            return null;
         }
     }
 
@@ -161,7 +158,7 @@ public class FileManager {
         for (int i = 1; i < 27; i++) {
             if (i > 1 && (i - 1) % 5 == 0)
                 text = text + "\n\n";
-            text = text + Character.toString((char) (i + 64)) + ":  " + letterCount[i] + "     ";
+            text = text + Character.toString((char) (i + 64)) + ": " + letterCount[i] + "   ";
         }
         text = text + "\n\n\nTotal letters collected: " + letterCount[0];
         Log.d(TAG,text);

@@ -24,7 +24,13 @@ public class SettingsScreen extends AppCompatActivity {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-
+                                FileManager fm = new FileManager();
+                                int [] letterCount = fm.retrieveLetters();
+                                for(int j = 1; j<letterCount.length; j++){
+                                    letterCount[j]++;
+                                }
+                                fm.setLetterCount(letterCount);
+                                fm.storeLetters();
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
