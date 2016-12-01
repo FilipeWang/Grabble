@@ -295,7 +295,7 @@ public class UnitTests {
     public void calendarTest_Day() throws Exception{
         String correctDay = "03122016";
         CalendarManager cm = new CalendarManager();
-        cm.cal.set(2016,11,3); //June 28th, 2017
+        cm.cal.set(2016,11,3); //December 3rd, 2016
         String testDay = cm.getCurrentDay();
         assertEquals(correctDay,testDay);
     }

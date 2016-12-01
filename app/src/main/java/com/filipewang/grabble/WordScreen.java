@@ -138,15 +138,21 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                 if(wordValidity && inventory){
                     deductFromInventory(curr,letterCount);
                     int score = pref.getInt("currentScore",0);
-                    int newScore = score + wordScore;
-                    //CHECK FOR OVERFLOW
-                    SharedPreferences.Editor edit = pref.edit();
-                    edit.putInt("currentScore", newScore);
-                    edit.commit();
-                    String message = "Valid word! Added " + wordScore + " points!";
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
-                            .show();
-                    currScore.setText(String.valueOf(newScore));
+                    // Check for Overflow
+                    if((Integer.MAX_VALUE - wordScore) > score){
+                        int newScore = score + wordScore;
+                        SharedPreferences.Editor edit = pref.edit();
+                        edit.putInt("currentScore", newScore);
+                        edit.commit();
+                        String message = "Valid word! Added " + wordScore + " points!";
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
+                                .show();
+                        currScore.setText(String.valueOf(newScore));
+                        checkAchievements(newScore);
+                    } else{
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Over max score!", Snackbar.LENGTH_LONG)
+                                .show();
+                    }
                 }else{
                     if(wordValidity)
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Not enough letters!", Snackbar.LENGTH_LONG)
@@ -200,7 +206,8 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                 boolean internet2 = checkInternetLocation(1);
                 if(internet2){
                     try {
-                        //Submit score NOW
+                        int score = pref.getInt("currentScore",0);
+                        Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_word), score);
                         startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
                                 getApplicationContext().getResources().getString(R.string.leaderboard_word)), LEADERBOARD);
                     } catch (Exception e) {
@@ -229,6 +236,16 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                 }
                 break;
 
+        }
+    }
+
+    private void checkAchievements(int score) {
+        try {
+            if (score > 99)
+                Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_triple_digits));
+        } catch(Exception e){
+            Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Couldn't save achievements!", Snackbar.LENGTH_LONG)
+                    .show();
         }
     }
 
