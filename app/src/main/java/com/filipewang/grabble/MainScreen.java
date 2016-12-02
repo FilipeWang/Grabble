@@ -23,8 +23,10 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainScreen extends AppCompatActivity implements View.OnClickListener{
 
@@ -61,10 +63,16 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
         String currDay = calendarManager.getCurrentDay();
         String letterOfDay = pref.getString(currDay,"0");
         if(letterOfDay.equals("0")){
-            calendarManager.cal.add(Calendar.DAY_OF_YEAR,-1);
-            String previousDay = calendarManager.getCurrentDay();
+            String patternString = "^(\\d)+$";
+            Pattern pattern = Pattern.compile(patternString);
             SharedPreferences.Editor edit = pref.edit();
-            edit.remove(previousDay);
+            Map<String, ?> allEntries = pref.getAll();
+            for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+                Matcher matcher = pattern.matcher(entry.getKey());
+                if(matcher.find()){
+                    edit.remove(entry.getKey());
+                }
+            }
             int indexLetter = ThreadLocalRandom.current().nextInt(0, 25 + 1);
             edit.putString(currDay, alphabet[indexLetter]);
             edit.commit();

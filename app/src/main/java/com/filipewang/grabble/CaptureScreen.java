@@ -3,6 +3,7 @@ package com.filipewang.grabble;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -46,10 +47,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private Circle currCircle;
 
-    final private FileManager fm = new FileManager();
+    private FileManager fm;
+    private CalendarManager calendarManager;
+    private SharedPreferences pref;
     private String TAG = "CaptureScreen";
     private ArrayList<MarkerData> markerList;
     private int[] letterCount;
+    private char letterOfDay;
     private boolean[] achievements;
     private final static int[] BUTTONS = {
             R.id.floatingInventory, R.id.floatingLeaderboards,
@@ -71,6 +75,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
+        fm = new FileManager();
+        calendarManager = new CalendarManager();
+        pref = getSharedPreferences("PREFS", 0);
+
+        letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
 
         markerList = fm.retrieveMarkerList();
         if (markerList == null){
@@ -396,7 +406,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     char c = marker.getTitle().charAt(0);
                     int numValue = (int) c;
                     int indexLetter = numValue - 64;
-                    letterCount[indexLetter]++;
+                    if(c == letterOfDay) {
+                        letterCount[indexLetter] = letterCount[indexLetter] + 2;
+                        Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Bonus letter!", Snackbar.LENGTH_LONG)
+                                .show();
+                    }
+                    else
+                        letterCount[indexLetter]++;
                     letterCount[0]++;
                     checkLetterAchievements(c,indexLetter);
                     checkAchievements();

@@ -55,7 +55,9 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
     };
 
     private static FileManager fm;
+    private CalendarManager calendarManager;
     private SharedPreferences pref;
+    private char letterOfDay;
     private String TAG = "WordScreen";
     private TextView currWord;
     private TextView currValue;
@@ -75,7 +77,10 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_word_screen);
 
+        calendarManager = new CalendarManager();
         pref = getSharedPreferences("PREFS", 0);
+
+        letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -105,7 +110,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         }
         String curr = getCurrentWord();
         currWord.setText("Word: " + curr);
-        currValue.setText("Value: " + String.valueOf(getValue(curr)));
+        currValue.setText("Value: " + String.valueOf(getValue(curr,letterOfDay)));
 
         int score = pref.getInt("currentScore",0);
         currScore.setText(String.valueOf(score));
@@ -131,7 +136,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         switch (view.getId()) {
             case R.id.createWordButton:
                 String curr = getCurrentWord();
-                int wordScore = getValue(curr);
+                int wordScore = getValue(curr,letterOfDay);
                 boolean wordValidity = checkWordValidity(curr.toLowerCase(),dictionary);
                 int [] letterCount = fm.retrieveLetters();
                 boolean inventory = checkInventory(curr,letterCount);
@@ -284,7 +289,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
         String curr = getCurrentWord();
         currWord.setText("Word: " + curr);
-        currValue.setText("Value: " + String.valueOf(getValue(curr)));
+        currValue.setText("Value: " + String.valueOf(getValue(curr,letterOfDay)));
     }
 
     private String getCurrentWord(){
@@ -296,12 +301,15 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         return word;
     }
 
-    public static int getValue(String word){
+    public static int getValue(String word, char bonusLetter){
         int value = 0;
         for(int i=0; i<7; i++){
             int numValue = (int) word.charAt(i);
             int indexLetter = numValue - 65;
-            value = value + letterValue[indexLetter];
+            if(word.charAt(i) == bonusLetter)
+                value = value + 2*letterValue[indexLetter];
+            else
+                value = value + letterValue[indexLetter];
         }
         return value;
     }
@@ -317,7 +325,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                 dict.add(wordFinal);
             }
         } catch (Exception e) {
-            Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Error openening dictionary!", Snackbar.LENGTH_LONG)
+            Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Error opening dictionary!", Snackbar.LENGTH_LONG)
                     .show();
         }
         dictionary = dict;

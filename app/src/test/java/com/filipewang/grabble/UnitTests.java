@@ -23,52 +23,77 @@ import static org.junit.Assert.assertEquals;
 
 public class UnitTests {
 
-    // Testing different words in the dictionary against their calculated values
-    // We use words that cover the whole alphabet
+    /** Testing different words in the dictionary against their calculated values.
+     *  We use words that cover the whole alphabet.
+     *  We first test without bonus letters (double value) and then with them.
+     *  The function getValue takes a string with capital letters and a character which is the bonus
+     *  letter which has double the value.
+     *
+     *  Note: To test without bonuses we send as a bonus letter a zero.
+     */
 
-    //3+3+8+4+6+5+13 = 42
+    // 3+3+8+4+6+5+13 = 42
     @Test
-    public void checkWordValue_AARONIC() throws Exception{assertEquals(42,WordScreen.getValue("AARONIC"));}
+    public void checkWordValue_AARONIC() throws Exception{assertEquals(42,WordScreen.getValue("AARONIC",'0'));}
 
     // 3+20+5+11+5+2+6 = 52
     @Test
-    public void checkWordValue_ABILITY() throws Exception{assertEquals(62,WordScreen.getValue("ABILITY"));}
+    public void checkWordValue_ABILITY() throws Exception{assertEquals(62,WordScreen.getValue("ABILITY",'0'));}
 
     // 20+4+11+2+3+18+1 = 59
     @Test
-    public void checkWordValue_BOLTAGE() throws Exception{assertEquals(59,WordScreen.getValue("BOLTAGE"));}
+    public void checkWordValue_BOLTAGE() throws Exception{assertEquals(59,WordScreen.getValue("BOLTAGE",'0'));}
 
     // 15+8+3+6+13+1+7 = 53
     @Test
-    public void checkWordValue_FRANCES() throws Exception{assertEquals(53,WordScreen.getValue("FRANCES"));}
+    public void checkWordValue_FRANCES() throws Exception{assertEquals(53,WordScreen.getValue("FRANCES",'0'));}
 
     // 19+3+1+4+6+5+13 = 51
     @Test
-    public void checkWordValue_PAEONIC() throws Exception{assertEquals(51,WordScreen.getValue("PAEONIC"));}
+    public void checkWordValue_PAEONIC() throws Exception{assertEquals(51,WordScreen.getValue("PAEONIC",'0'));}
 
     // 7+1+8+19+1+6+2 = 44
     @Test
-    public void checkWordValue_SERPENT() throws Exception{assertEquals(44,WordScreen.getValue("SERPENT"));}
+    public void checkWordValue_SERPENT() throws Exception{assertEquals(44,WordScreen.getValue("SERPENT",'0'));}
 
     // 18+4+10+9+1+3+10 = 55
     @Test
-    public void checkWordValue_GODHEAD() throws Exception{assertEquals(55,WordScreen.getValue("GODHEAD"));}
+    public void checkWordValue_GODHEAD() throws Exception{assertEquals(55,WordScreen.getValue("GODHEAD",'0'));}
 
     // 9+12+21+1+11+16+22 = 92
     @Test
-    public void checkWordValue_HUVELYK() throws Exception{assertEquals(92,WordScreen.getValue("HUVELYK"));}
+    public void checkWordValue_HUVELYK() throws Exception{assertEquals(92,WordScreen.getValue("HUVELYK",'0'));}
 
     // 26+4+4+2+3+23+16 = 78
     @Test
-    public void checkWordValue_ZOOTAXY() throws Exception{assertEquals(78,WordScreen.getValue("ZOOTAXY"));}
+    public void checkWordValue_ZOOTAXY() throws Exception{assertEquals(78,WordScreen.getValue("ZOOTAXY",'0'));}
 
     // 17+5+13+9+2+25+1 = 72
     @Test
-    public void checkWordValue_WICHTJE() throws Exception{assertEquals(72,WordScreen.getValue("WICHTJE"));}
+    public void checkWordValue_WICHTJE() throws Exception{assertEquals(72,WordScreen.getValue("WICHTJE",'0'));}
 
     // 24+12+3+1+10+3+14 = 67
     @Test
-    public void checkWordValue_QUAEDAM() throws Exception{assertEquals(67,WordScreen.getValue("QUAEDAM"));}
+    public void checkWordValue_QUAEDAM() throws Exception{assertEquals(67,WordScreen.getValue("QUAEDAM",'0'));}
+
+    /**
+     * Now let's try some with bonus letters.
+     * Case 1: No bonus letter matches (calculate normal value)
+     * Case 2: Single bonus letter
+     * Case 3: Multiple bonus letters
+     */
+
+    // 19+3+1+4+6+5+13 = 51
+    @Test
+    public void checkWordValue_BonusPAEONIC() throws Exception{assertEquals(51,WordScreen.getValue("PAEONIC",'U'));}
+
+    // 17+5+13+9+2+25+1*2 = 73
+    @Test
+    public void checkWordValue_BonusWICHTJE() throws Exception{assertEquals(73,WordScreen.getValue("WICHTJE",'E'));}
+
+    // 3*2+3*2+8+4+6+5+13 = 48
+    @Test
+    public void checkWordValue_BonusAARONIC() throws Exception{assertEquals(48,WordScreen.getValue("AARONIC",'A'));}
 
     // Test that all letters have appeared at least once
     @Test
