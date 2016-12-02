@@ -3,6 +3,7 @@ package com.filipewang.grabble;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,22 +23,51 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainScreen extends AppCompatActivity implements View.OnClickListener{
 
     private ProgressDialog progressDialog;
+    private SharedPreferences pref;
+    private CalendarManager calendarManager;
     private final static int[] BUTTONS = {
             R.id.settingsButton, R.id.infoButton,
             R.id.mainCapture, R.id.mainWord
     };
+    private String [] alphabet = {"A","B","C","D","E",
+            "F","G","H","I","J",
+            "K","L","M","N","O",
+            "P","Q","R","S","T",
+            "U","V","W","X","Y","Z"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
+        calendarManager = new CalendarManager();
+
+        // Set up letter of the day
+        letterOfDaySetup();
+
         for (int id : BUTTONS) {
             findViewById(id).setOnClickListener(this);
+        }
+    }
+
+    private void letterOfDaySetup(){
+        pref = getSharedPreferences("PREFS", 0);
+        String currDay = calendarManager.getCurrentDay();
+        String letterOfDay = pref.getString(currDay,"0");
+        if(letterOfDay.equals("0")){
+            calendarManager.cal.add(Calendar.DAY_OF_YEAR,-1);
+            String previousDay = calendarManager.getCurrentDay();
+            SharedPreferences.Editor edit = pref.edit();
+            edit.remove(previousDay);
+            int indexLetter = ThreadLocalRandom.current().nextInt(0, 25 + 1);
+            edit.putString(currDay, alphabet[indexLetter]);
+            edit.commit();
         }
     }
 
@@ -153,6 +184,8 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
             } else {
                 cleanUp();
                 progressDialog.dismiss();
+                Toast.makeText(MainScreen.this,
+                        "Moving to capture mode...", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(MainScreen.this, CaptureScreen.class));
             }
         }
