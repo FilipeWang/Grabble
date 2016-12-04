@@ -327,6 +327,23 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
                             }
+                        })
+                        .setNeutralButton("Clear", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mMap.clear();
+                                try {
+                                    for (MarkerData curr : markerList) {
+                                            mMap.addMarker(new MarkerOptions()
+                                                    .position(curr.getCoordinates())
+                                                    .title(curr.letter)
+                                                    .snippet(curr.name));
+                                    }
+                                } catch (Exception e) {
+                                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No more letters for today!", Snackbar.LENGTH_LONG)
+                                            .show();
+                                }
+                            }
                         });
                 AlertDialog inputDialog = builderInput.create();
                 inputDialog.show();

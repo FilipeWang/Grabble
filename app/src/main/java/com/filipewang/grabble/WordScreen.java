@@ -149,7 +149,12 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                         SharedPreferences.Editor edit = pref.edit();
                         edit.putInt("currentScore", newScore);
                         edit.commit();
-                        String message = "Valid word! Added " + wordScore + " points!";
+                        String message;
+                        if(curr.indexOf(letterOfDay) > -1){
+                            message = "Bonus letter! Added " + wordScore + " points!";
+                        }else {
+                            message = "Added " + wordScore + " points!";
+                        }
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
                                 .show();
                         currScore.setText(String.valueOf(newScore));
