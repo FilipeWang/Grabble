@@ -39,6 +39,20 @@
         fab:menu_labels_position="left">
 
         <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingFind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_search_white_24dp"
+            fab:fab_colorNormal="@android:color/transparent"
+            fab:fab_colorPressed="@android:color/transparent"
+            fab:fab_colorRipple="@android:color/transparent"
+            fab:fab_showShadow="true"
+            fab:fab_shadowColor="@android:color/transparent"
+            fab:fab_size="mini"
+            fab:fab_label="Find" />
+
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/floatingInventory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

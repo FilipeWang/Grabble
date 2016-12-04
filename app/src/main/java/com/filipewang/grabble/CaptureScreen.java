@@ -17,7 +17,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.NumberPicker;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,6 +30,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -55,9 +58,15 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     private int[] letterCount;
     private char letterOfDay;
     private boolean[] achievements;
+    private String [] alphabet = {"A","B","C","D","E",
+            "F","G","H","I","J",
+            "K","L","M","N","O",
+            "P","Q","R","S","T",
+            "U","V","W","X","Y","Z"};
     private final static int[] BUTTONS = {
             R.id.floatingInventory, R.id.floatingLeaderboards,
-            R.id.floatingAchievements, R.id.floatingCircle
+            R.id.floatingAchievements, R.id.floatingCircle,
+            R.id.floatingFind
     };
 
     private static int RC_SIGN_IN = 9001;
@@ -274,6 +283,54 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.floatingFind:
+                LayoutInflater layoutInflater = LayoutInflater.from(CaptureScreen.this);
+                View box = layoutInflater.inflate(R.layout.find_dialog, null);
+                AlertDialog.Builder builderInput = new AlertDialog.Builder(CaptureScreen.this);
+                builderInput.setView(box);
+                final NumberPicker np = (NumberPicker) box.findViewById(R.id.findLetterPicker);
+                np.setMaxValue(0);
+                np.setMaxValue(25);
+                np.setDisplayedValues(alphabet);
+                np.setWrapSelectorWheel(false);
+                builderInput.setCancelable(false)
+                        .setTitle("Letter to find")
+                        .setPositiveButton("Find", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                String findLetter = alphabet[np.getValue()];
+                                mMap.clear();
+                                try {
+                                    for (MarkerData curr : markerList) {
+                                        if((curr.letter.equals(findLetter))){
+                                            mMap.addMarker(new MarkerOptions()
+                                                    .position(curr.getCoordinates())
+                                                    .title(curr.letter)
+                                                    .snippet(curr.name)
+                                                    .icon(BitmapDescriptorFactory
+                                                            .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                                        } else{
+                                            mMap.addMarker(new MarkerOptions()
+                                                    .position(curr.getCoordinates())
+                                                    .title(curr.letter)
+                                                    .snippet(curr.name));
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No more letters for today!", Snackbar.LENGTH_LONG)
+                                            .show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                AlertDialog inputDialog = builderInput.create();
+                inputDialog.show();
+                break;
             case R.id.floatingInventory:
                 AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
                 fm.setLetterCount(letterCount);
