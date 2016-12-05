@@ -69,6 +69,9 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             R.id.floatingFind
     };
 
+    private boolean letterSetting;
+    private boolean markerSetting;
+
     private static int RC_SIGN_IN = 9001;
     private static int LEADERBOARD = 1000;
     private static int ACHIEVEMENTS = 1001;
@@ -89,7 +92,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         calendarManager = new CalendarManager();
         pref = getSharedPreferences("PREFS", 0);
 
-        letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
+        letterSetting = pref.getBoolean("bonusLetter",true);
+        markerSetting = pref.getBoolean("markerColor",false);
+
+        if(letterSetting)
+            letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
+        else
+            letterOfDay = '0';
 
         markerList = fm.retrieveMarkerList();
         if (markerList == null){
@@ -301,19 +310,39 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                                 String findLetter = alphabet[np.getValue()];
                                 mMap.clear();
                                 try {
-                                    for (MarkerData curr : markerList) {
-                                        if((curr.letter.equals(findLetter))){
-                                            mMap.addMarker(new MarkerOptions()
-                                                    .position(curr.getCoordinates())
-                                                    .title(curr.letter)
-                                                    .snippet(curr.name)
-                                                    .icon(BitmapDescriptorFactory
-                                                            .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                                        } else{
-                                            mMap.addMarker(new MarkerOptions()
-                                                    .position(curr.getCoordinates())
-                                                    .title(curr.letter)
-                                                    .snippet(curr.name));
+                                    if(!markerSetting) {
+                                        for (MarkerData curr : markerList) {
+                                            if ((curr.letter.equals(findLetter))) {
+                                                mMap.addMarker(new MarkerOptions()
+                                                        .position(curr.getCoordinates())
+                                                        .title(curr.letter)
+                                                        .snippet(curr.name)
+                                                        .icon(BitmapDescriptorFactory
+                                                                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                                            } else {
+                                                mMap.addMarker(new MarkerOptions()
+                                                        .position(curr.getCoordinates())
+                                                        .title(curr.letter)
+                                                        .snippet(curr.name));
+                                            }
+                                        }
+                                    } else{
+                                        for (MarkerData curr : markerList) {
+                                            if ((curr.letter.equals(findLetter))) {
+                                                mMap.addMarker(new MarkerOptions()
+                                                        .position(curr.getCoordinates())
+                                                        .title(curr.letter)
+                                                        .snippet(curr.name)
+                                                        .icon(BitmapDescriptorFactory
+                                                                .defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+                                            } else {
+                                                mMap.addMarker(new MarkerOptions()
+                                                        .position(curr.getCoordinates())
+                                                        .title(curr.letter)
+                                                        .snippet(curr.name)
+                                                        .icon(BitmapDescriptorFactory
+                                                                .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            }
                                         }
                                     }
                                 } catch (Exception e) {
@@ -334,10 +363,19 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                                 mMap.clear();
                                 try {
                                     for (MarkerData curr : markerList) {
+                                        if(!markerSetting) {
                                             mMap.addMarker(new MarkerOptions()
                                                     .position(curr.getCoordinates())
                                                     .title(curr.letter)
                                                     .snippet(curr.name));
+                                        }else {
+                                            mMap.addMarker(new MarkerOptions()
+                                                    .position(curr.getCoordinates())
+                                                    .title(curr.letter)
+                                                    .snippet(curr.name)
+                                                    .icon(BitmapDescriptorFactory
+                                                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                        }
                                     }
                                 } catch (Exception e) {
                                     Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No more letters for today!", Snackbar.LENGTH_LONG)
@@ -541,10 +579,19 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         try {
             for (MarkerData curr : markerList) {
-                mMap.addMarker(new MarkerOptions()
-                        .position(curr.getCoordinates())
-                        .title(curr.letter)
-                        .snippet(curr.name));
+                if(!markerSetting) {
+                    mMap.addMarker(new MarkerOptions()
+                            .position(curr.getCoordinates())
+                            .title(curr.letter)
+                            .snippet(curr.name));
+                } else{
+                    mMap.addMarker(new MarkerOptions()
+                            .position(curr.getCoordinates())
+                            .title(curr.letter)
+                            .snippet(curr.name)
+                            .icon(BitmapDescriptorFactory
+                                    .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                }
             }
         } catch (Exception e) {
             Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No more letters for today!", Snackbar.LENGTH_LONG)

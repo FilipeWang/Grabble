@@ -70,6 +70,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
     private static int [] letterValue = {3,20,13,10,1,15,18,9,5,25,22,11,14,
                                     6,4,19,24,8,7,2,12,21,17,23,16,26};
     private static ArrayList<String> dictionary;
+    private boolean letterSetting;
 
 
     @Override
@@ -80,7 +81,12 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         calendarManager = new CalendarManager();
         pref = getSharedPreferences("PREFS", 0);
 
-        letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
+        letterSetting = pref.getBoolean("bonusLetter",true);
+
+        if(letterSetting)
+            letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
+        else
+            letterOfDay = '0';
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
