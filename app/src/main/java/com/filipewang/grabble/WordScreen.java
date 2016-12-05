@@ -143,7 +143,6 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                 if(wordValidity && inventory){
                     deductFromInventory(curr,letterCount);
                     int score = pref.getInt("currentScore",0);
-                    // Check for Overflow
                     if((Integer.MAX_VALUE - wordScore) > score){
                         int newScore = score + wordScore;
                         SharedPreferences.Editor edit = pref.edit();

@@ -34,21 +34,21 @@
         <android.support.v7.widget.SwitchCompat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/soundEffectSwitch"
-            android:layout_alignBaseline="@+id/soundEffectTV"
-            android:layout_alignBottom="@+id/soundEffectTV"
+            android:id="@+id/settingsLetterSwitch"
+            android:layout_alignBaseline="@+id/settingsLetterTV"
+            android:layout_alignBottom="@+id/settingsLetterTV"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="36dp"
             android:theme="@style/Color1SwitchStyle"/>
 
         <TextView
-            android:text="Sample1"
+            android:text="Secret Bonus Letter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
             android:layout_marginTop="29dp"
             android:textSize="18sp"
-            android:id="@+id/soundEffectTV"
+            android:id="@+id/settingsLetterTV"
             android:layout_marginStart="36dp"
             android:layout_alignParentStart="true" />
 
@@ -62,21 +62,21 @@
         <android.support.v7.widget.SwitchCompat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/sample1Switch"
-            android:layout_alignBaseline="@+id/sample1TV"
-            android:layout_alignBottom="@+id/sample1TV"
+            android:id="@+id/settingsMarkerSwitch"
+            android:layout_alignBaseline="@+id/settingsMarkerTV"
+            android:layout_alignBottom="@+id/settingsMarkerTV"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="36dp"
             android:theme="@style/Color1SwitchStyle"/>
 
         <TextView
-            android:text="Sample2"
+            android:text="Alternative Marker Colors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
             android:layout_marginTop="29dp"
             android:textSize="18sp"
-            android:id="@+id/sample1TV"
+            android:id="@+id/settingsMarkerTV"
             android:layout_marginStart="36dp"
             android:layout_alignParentStart="true" />
 
@@ -84,16 +84,46 @@
 
     </LinearLayout>
 
-    <Button
-        android:text="Reset Inventory"
+    <TextView
+        android:text="Reset:"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="bottom|center"
-        android:id="@+id/buttonSettingsReset"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:id="@+id/settingsResetTV"
+        android:gravity="bottom"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="10dp"
+        android:layout_marginStart="36dp"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:text="Inventory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|right"
+        android:textSize="16sp"
+        android:layout_marginEnd="36dp"
+        android:id="@+id/buttonSettingsResetInventory"
         android:textColor="#FFFFFF"
         android:background="@android:color/transparent"
         android:paddingBottom="10dp"
+        android:layout_alignBaseline="@+id/settingsResetTV"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <Button
+        android:text="Score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:gravity="bottom"
+        android:id="@+id/buttonSettingsResetScore"
+        android:textColor="#FFFFFF"
+        android:background="@android:color/transparent"
+        android:paddingBottom="10dp"
+        android:layout_alignBaseline="@+id/settingsResetTV"
+        android:layout_alignBottom="@+id/settingsResetTV"
+        android:layout_toEndOf="@+id/buttonSettingsResetInventory" />
 
 </RelativeLayout>
