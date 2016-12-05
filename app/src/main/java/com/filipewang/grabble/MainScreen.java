@@ -35,13 +35,16 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
     private CalendarManager calendarManager;
     private final static int[] BUTTONS = {
             R.id.settingsButton, R.id.infoButton,
-            R.id.mainCapture, R.id.mainWord
+            R.id.mainCapture, R.id.mainWord,
+            R.id.mainTitle
     };
     private String [] alphabet = {"A","B","C","D","E",
             "F","G","H","I","J",
             "K","L","M","N","O",
             "P","Q","R","S","T",
             "U","V","W","X","Y","Z"};
+    private static int easterEgg = 0;
+    private String letterOfDay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +64,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
     private void letterOfDaySetup(){
         pref = getSharedPreferences("PREFS", 0);
         String currDay = calendarManager.getCurrentDay();
-        String letterOfDay = pref.getString(currDay,"0");
+        letterOfDay = pref.getString(currDay,"0");
         if(letterOfDay.equals("0")){
             String patternString = "^(\\d)+$";
             Pattern pattern = Pattern.compile(patternString);
@@ -82,6 +85,15 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onClick(View view) {
         switch(view.getId()){
+            case R.id.mainTitle:
+                easterEgg++;
+                if(easterEgg == 5){
+                    easterEgg = 0;
+                    String message = "Secret bonus letter: " + letterOfDay;
+                    Toast.makeText(MainScreen.this,
+                            message, Toast.LENGTH_SHORT).show();
+                }
+                break;
             case R.id.settingsButton:
                 startActivity(new Intent(MainScreen.this, SettingsScreen.class));
                 break;

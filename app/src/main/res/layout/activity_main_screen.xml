@@ -64,11 +64,12 @@
         android:paddingLeft="10dp"
         android:paddingBottom="10dp" />
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Grabble"
+        android:background="@android:color/transparent"
         android:textColor="#FFFFFF"
         android:layout_marginTop="150dp"
         android:id="@+id/mainTitle"
