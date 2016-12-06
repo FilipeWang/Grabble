@@ -125,18 +125,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                 }
                 break;
             case R.id.mainWord:
-                ConnectivityManager cm2 =
-                        (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo activeNetwork2 = cm2.getActiveNetworkInfo();
-                boolean isConnected2 = activeNetwork2 != null &&
-                        activeNetwork2.isConnectedOrConnecting();
-
-                if (!isConnected2) {
-                    Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Connect to the internet!", Snackbar.LENGTH_LONG)
-                            .show();
-                } else {
                     startActivity(new Intent(MainScreen.this,WordScreen.class));
-                }
                 break;
         }
     }
