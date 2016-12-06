@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -70,6 +71,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
     private static int [] letterValue = {3,20,13,10,1,15,18,9,5,25,22,11,14,
                                     6,4,19,24,8,7,2,12,21,17,23,16,26};
     private static ArrayList<String> dictionary;
+    private boolean[] achievements;
     private boolean letterSetting;
 
 
@@ -122,6 +124,9 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         currScore.setText(String.valueOf(score));
 
         fm = new FileManager();
+        achievements = fm.retrieveAchievements();
+        fm.setAchievements(achievements);
+        fm.storeAchievements();
         loadDictionary();
     }
 
@@ -163,7 +168,10 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
                                 .show();
                         currScore.setText(String.valueOf(newScore));
-                        checkAchievements(newScore);
+                        if(newScore > 99){
+                            achievements[7] = true;
+                            checkAchievements();
+                        }
                     } else{
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Over max score!", Snackbar.LENGTH_LONG)
                                 .show();
@@ -254,9 +262,9 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         }
     }
 
-    private void checkAchievements(int score) {
+    private void checkAchievements() {
         try {
-            if (score > 99)
+            if (achievements[7])
                 Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_triple_digits));
         } catch(Exception e){
             Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Couldn't save achievements!", Snackbar.LENGTH_LONG)
@@ -343,7 +351,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        Log.d(TAG,"Connected.");
     }
 
     @Override

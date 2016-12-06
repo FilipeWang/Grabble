@@ -122,7 +122,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
         achievements = fm.retrieveAchievements();
         if (achievements == null)
-            achievements = new boolean[7];
+            achievements = new boolean[8];
 
         fm.setMarkerList(markerList);
         fm.setLetterCount(letterCount);
@@ -179,6 +179,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        Log.d(TAG,"Connected.");
     }
 
     @Override
