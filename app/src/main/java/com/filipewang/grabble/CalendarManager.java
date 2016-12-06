@@ -5,8 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
- * Created by Filipe on 29-Oct-16.
  * This class manages anything to do with dates.
+ * Its main two functions is getting the correct week day and the current day which
+ * is later used as an ID for different actions.
  */
 public class CalendarManager {
     Calendar cal;
@@ -16,16 +17,16 @@ public class CalendarManager {
         cal = Calendar.getInstance();
     }
 
+    // Gets the current day of the week, for the Calendar cal, all in lower case.
     public String getDayOfWeek(){
         int day = cal.get(Calendar.DAY_OF_WEEK);
         day = day - 1;
-        String currWeekDay = weekDays[day];
-        return currWeekDay;
+        return weekDays[day];
     }
 
+    // Gets the current day as an ID in the format of ddMMyyy.
     public String getCurrentDay(){
         DateFormat df = new SimpleDateFormat("ddMMyyy");
-        String currDay = df.format(cal.getTime());
-        return currDay;
+        return df.format(cal.getTime());
     }
 }
