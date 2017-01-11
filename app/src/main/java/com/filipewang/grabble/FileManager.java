@@ -47,6 +47,7 @@ public class FileManager {
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(markerList);
             oos.close();
+            fos.close();
         } catch(Exception e){
             Log.d(TAG, "File creation error!");
         }
@@ -58,6 +59,7 @@ public class FileManager {
             ObjectInputStream ois = new ObjectInputStream(fis);
             ArrayList<MarkerData> markers = (ArrayList<MarkerData>) ois.readObject();
             ois.close();
+            fis.close();
             return markers;
         } catch(Exception e){
             Log.d(TAG, "File retrieval error!");
@@ -71,6 +73,7 @@ public class FileManager {
             ObjectInputStream ois = new ObjectInputStream(fis);
             int [] letters = (int []) ois.readObject();
             ois.close();
+            fis.close();
             return letters;
         } catch(Exception e){
             Log.d(TAG, "File retrieval error!");
@@ -86,6 +89,7 @@ public class FileManager {
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(letterCount);
             oos.close();
+            fos.close();
         } catch(Exception e){
             Log.d(TAG, "File creation error!");
         }
@@ -97,6 +101,7 @@ public class FileManager {
             ObjectInputStream ois = new ObjectInputStream(fis);
             boolean [] achievementsFile = (boolean []) ois.readObject();
             ois.close();
+            fis.close();
             return achievementsFile;
         } catch(Exception e){
             Log.d(TAG, "File retrieval error!");
@@ -112,6 +117,7 @@ public class FileManager {
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(achievements);
             oos.close();
+            fos.close();
         } catch(Exception e){
             Log.d(TAG, "File creation error!");
         }

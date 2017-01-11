@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -266,6 +267,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         try {
             if (achievements[7])
                 Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_triple_digits));
+            new StoreDataAchievementsWord().execute(achievements);
         } catch(Exception e){
             Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Couldn't save achievements!", Snackbar.LENGTH_LONG)
                     .show();
@@ -476,5 +478,26 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
             return (gpsLocation && networkLocation && isConnected);
         else
             return isConnected;
+    }
+
+    class StoreDataAchievementsWord extends AsyncTask<boolean[], Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(boolean[]... arrays) {
+            try {
+                FileManager fm = new FileManager();
+                fm.setAchievements(arrays[0]);
+                fm.storeAchievements();
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean flag) {
+            if (!flag)
+                Log.d(TAG, "Error in storing data!");
+        }
     }
 }
