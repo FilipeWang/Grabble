@@ -12,13 +12,13 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by Filipe on 29-Nov-16.
  * This class contains unit tests for 3 of the required marking criteria:
  * - Calculate the correct value of a given word
  * - Check whether a word is valid or not
  * - Loading the right map for a given day
  *
- * Cases are in this format in the comments: Case caseNum: Description, expected outcome
+ * Cases are in this format in the comments:
+ * Case caseNum: Description, expected outcome
  */
 
 public class UnitTests {

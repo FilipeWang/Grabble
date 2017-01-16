@@ -41,15 +41,33 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 
 import java.util.ArrayList;
 
-
+/**
+ * This class is the used for the CaptureScreen Activity.
+ * It contains a map fragment to display Google Maps and also uses
+ * Google's location services to deal with the user's current location.
+ * In addition to that it uses the Google Play services to add achievements
+ * and leaderboards to the game.
+ */
 public class CaptureScreen extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener{
 
+    // Fields for options in the settings
+    private boolean letterSetting;
+    private boolean markerSetting;
+
+    // Fields for Google stuff
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Circle currCircle;
+    private static int RC_SIGN_IN = 9001;
+    private static int LEADERBOARD = 1000;
+    private static int ACHIEVEMENTS = 1001;
+    private boolean mResolvingConnectionFailure = false;
+    private boolean mAutoStartSignInflow = true;
+    private boolean mSignInClicked = false;
 
+    // Fields for everything else
     private FileManager fm;
     private CalendarManager calendarManager;
     private SharedPreferences pref;
@@ -69,17 +87,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             R.id.floatingFind
     };
 
-    private boolean letterSetting;
-    private boolean markerSetting;
-
-    private static int RC_SIGN_IN = 9001;
-    private static int LEADERBOARD = 1000;
-    private static int ACHIEVEMENTS = 1001;
-
-    private boolean mResolvingConnectionFailure = false;
-    private boolean mAutoStartSignInflow = true;
-    private boolean mSignInClicked = false;
-
+    // We use the onCreate method to initialize whatever we may need
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,19 +96,27 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
+        // Set the fields to the current isntance
         fm = new FileManager();
         calendarManager = new CalendarManager();
         pref = getSharedPreferences("PREFS", 0);
 
+        // Get the settings chosen by the user
         letterSetting = pref.getBoolean("bonusLetter",true);
         markerSetting = pref.getBoolean("markerColor",false);
 
+        // If user doesn't want to have the bonus letter then set it to zero and it'll never match
+        // a character.
         if(letterSetting)
             letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
         else
             letterOfDay = '0';
 
+        // Get the current marker list downloaded from MainScreen
         markerList = fm.retrieveMarkerList();
+
+        // If the list is null it means there was an error downloading data so return to MainScreen
+        // and clear the current data
         if (markerList == null){
             fm.resetMarkers();
             AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
@@ -116,22 +132,24 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             dialog.show();
         }
 
+        // Get the inventory and achievements; initialize to zeros if they are null
         letterCount = fm.retrieveLetters();
         if (letterCount == null)
             letterCount = new int[27];
-
         achievements = fm.retrieveAchievements();
         if (achievements == null)
             achievements = new boolean[8];
 
+        // We sync the data we have with the files in case there were some problems loading.
+        // This is used as a fail safe in some case that data is not synchronized.
         fm.setMarkerList(markerList);
         fm.setLetterCount(letterCount);
         fm.setAchievements(achievements);
-
         fm.storeMarkerList();
         fm.storeLetters();
         fm.storeAchievements();
 
+        // Connect to the Google API, in case of a failed connection go to onConnectionFailed method
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -142,19 +160,23 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     .build();
         }
 
+        // Call the AsyncTask to get the map fragment, onMapReady is called once it's ready
         mapFragment.getMapAsync(this);
 
+        // Add action listeners to any buttons in the activity
         for (int id : BUTTONS) {
             findViewById(id).setOnClickListener(this);
         }
     }
 
+    // Try to connect to the Google API
     @Override
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
+    // When application is resumed retrieve the relevant data from storage
     @Override
     protected void onResume() {
         markerList = fm.retrieveMarkerList();
@@ -171,6 +193,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         super.onRestart();
     }
 
+    // Disconnect from Google API
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
@@ -187,6 +210,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
+    // Method that deals with a connection failed, taken from the Documentation online
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if (mResolvingConnectionFailure) {
@@ -202,9 +226,6 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             mResolvingConnectionFailure = true;
 
             // Attempt to resolve the connection failure using BaseGameUtils.
-            // The R.string.signin_other_error value should reference a generic
-            // error string in your strings.xml file, such as "There was
-            // an issue with sign-in, please try again later."
             if (!BaseGameUtils.resolveConnectionFailure(this,
                     mGoogleApiClient, connectionResult,
                     RC_SIGN_IN, "Error")) {
@@ -213,6 +234,12 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * Method that deals with specific errors (identified by the requestCode).
+     * If the log in fails it will ask if the user wants to proceed offline.
+     * If the player is offline and tries to connect to the leaderboards/achievements
+     * it will give an error message.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
@@ -290,10 +317,14 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
+    // Deals with any results of the action listener of the buttons. Each button name
+    // represents the button on a screen (the floating buttons are the ones on the floating menu)
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            // Find function: lets the user find letters on the map.
             case R.id.floatingFind:
+                // Prepare AlertDialog for the user to pick a letter
                 LayoutInflater layoutInflater = LayoutInflater.from(CaptureScreen.this);
                 View box = layoutInflater.inflate(R.layout.find_dialog, null);
                 AlertDialog.Builder builderInput = new AlertDialog.Builder(CaptureScreen.this);
@@ -308,9 +339,14 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         .setPositiveButton("Find", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                // Find function will be the positive button. First get the letter
+                                // from the picker.
                                 String findLetter = alphabet[np.getValue()];
-                                mMap.clear();
+                                mMap.clear(); // Clear the map and change color of found markers
+
+                                // Surround with try and catch in case user collected all letters
                                 try {
+                                    // Color the markers appropriately depending on the setting
                                     if(!markerSetting) {
                                         for (MarkerData curr : markerList) {
                                             if ((curr.letter.equals(findLetter))) {
@@ -355,12 +391,14 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                // Negative button cancels the find function
                                 dialogInterface.dismiss();
                             }
                         })
                         .setNeutralButton("Clear", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                // Clear button restores all markers to normal color
                                 mMap.clear();
                                 try {
                                     for (MarkerData curr : markerList) {
@@ -387,24 +425,35 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                 AlertDialog inputDialog = builderInput.create();
                 inputDialog.show();
                 break;
+
+            // Shows an AlertDialog with the user's inventory
             case R.id.floatingInventory:
                 AlertDialog.Builder builder = new AlertDialog.Builder(CaptureScreen.this);
                 fm.setLetterCount(letterCount);
+
+                // Gets the inventory as a formatted String to display to the user
                 String currentInventory = fm.getLetterCount();
+
                 builder.setMessage(currentInventory)
                 .setTitle("Letter Inventory");
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 break;
+
+            // Leaderboard function
             case R.id.floatingLeaderboards:
+                // Only allow the user to check the leaderboard if the internet is on
                 boolean internet = checkInternetLocation(1);
                 if(internet){
                     try {
+                        // Submit the user's current score and attempt to show the leaderboards.
                         Log.d(TAG,"Letters submitted: " + letterCount[0]);
                         Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_grabble), letterCount[0]);
                         startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
                                 getApplicationContext().getResources().getString(R.string.leaderboard_grabble)), LEADERBOARD);
                     } catch (Exception e) {
+                        // The only case that the leaderboards won't show is if the user is not logged
+                        // in.
                         AlertDialog.Builder builder2 = new AlertDialog.Builder(CaptureScreen.this);
                         builder2.setMessage("Player not signed in, cannot access leaderboards. \nDo you want to restart capture mode?")
                                 .setCancelable(false)
@@ -425,10 +474,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                         dialog2.show();
                     }
                 } else{
+                    // If there is no internet display an error
                     Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No internet!", Snackbar.LENGTH_LONG)
                             .show();
                 }
                 break;
+
+            // Achievements function. same process as accessing the leaderboards
             case R.id.floatingAchievements:
                 boolean internet2 = checkInternetLocation(1);
                 if(internet2){
@@ -462,9 +514,13 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                             .show();
                 }
                 break;
+
+            // Range function, displays a circle witht he user's grab range.
             case R.id.floatingCircle:
                 achievements[3] = true;
                 checkAchievements();
+
+                // If there is no circle draw it, otherwise clear it
                 if(currCircle == null)
                     drawBoundary(getCurrentLocation());
                 else{
@@ -479,46 +535,55 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
+     * Taken from the Documentation online.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        mMap = googleMap; // Set the current instance of map to the received map
 
-
-        //Test styling
+        // Stylize our map and configure some of its settings
         mMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
                         this, R.raw.style_json));
-
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
         mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
-        mMap.setMyLocationEnabled(true);
+        mMap.setMyLocationEnabled(true); // Enable location
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+        // Setting listener for the markers (this is how a user catches letters)
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
+                // Checking the distance between the user and the marker that was clicked
                 boolean close = checkDistance(marker.getPosition());
-                boolean internetLocation = checkInternetLocation(0);
+                boolean internetLocation = checkInternetLocation(0); // Check the connections
+
+                // If the marker is close and there is an internet connection and location allow the
+                // user to collect the letter.
                 if (close && internetLocation) {
-                    String point = marker.getSnippet();
-                    marker.remove();
+                    String point = marker.getSnippet(); // Unique identifier of the marker
+                    marker.remove(); // Remove it from the map
                     int index = -1;
+
+                    // Find where the marker is in the list to later remove it
                     for (int i = 0; i < markerList.size(); i++) {
                         if (markerList.get(i).name.equals(point)) {
                             index = i;
                             i = markerList.size();
                         }
                     }
+
+                    // Add the letter to the user's inventory
                     char c = marker.getTitle().charAt(0);
                     int numValue = (int) c;
                     int indexLetter = numValue - 64;
+
+                    // If the secret letter is activated check for it and give double the amount
                     if(c == letterOfDay) {
                         letterCount[indexLetter] = letterCount[indexLetter] + 2;
                         Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "Bonus letter!", Snackbar.LENGTH_LONG)
@@ -526,9 +591,15 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     }
                     else
                         letterCount[indexLetter]++;
+
+                    // Increase the overall letters collected count
                     letterCount[0]++;
+
+                    // Check for achievements for this particular letter
                     checkLetterAchievements(c,indexLetter);
                     checkAchievements();
+
+                    // Use the index to remove it from the list and update the files
                     markerList.remove(index);
                     new StoreDataMarker().execute(markerList);
                     new StoreDataLetters().execute(letterCount);
@@ -543,8 +614,8 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
-        // Since we are consuming the event this is necessary to
-        // manage closing openned markers before openning new ones
+        // This part of the code is used so that the user's camera is not moved to the marker's
+        // location when its clicked on.
         // Based on:
         // http://stackoverflow.com/questions/14497734/dont-snap-to-marker-after-click-in-android-map-v2
         final Marker[] lastOpenned = {null};
@@ -575,11 +646,11 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
-        //Set max zoom out
-        //mMap.setMinZoomPreference(17);
-
+        // Fill the map with the markers
         try {
             for (MarkerData curr : markerList) {
+
+                // Set the appropriate color depending on the settings option
                 if(!markerSetting) {
                     mMap.addMarker(new MarkerOptions()
                             .position(curr.getCoordinates())
@@ -599,29 +670,38 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     .show();
         }
 
+        // Move the camera to a pre defined spot within the game field
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(55.94400, -3.192473), 19));
 
     }
 
+    // Method used to check the distance between a user's current location and a marker.
+    // It receives the marker's location as a parameter.
     private boolean checkDistance(LatLng position) {
         Location currentLocation = getCurrentLocation();
         Location markerLocation = new Location("Current");
+
+        // This check is used in case the user does not have a current location
         if (currentLocation != null) {
             markerLocation.setLatitude(position.latitude);
             markerLocation.setLongitude(position.longitude);
 
             float diff = currentLocation.distanceTo(markerLocation);
             int difference = Math.round(diff);
+
+            // Return true if the distance is below 20 meters, otherwise false
             return difference < 20;
         }
         return false;
     }
 
+    // Method to get the user's current known last location
     private Location getCurrentLocation() {
         return LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
     }
 
+    // Method to draw a circle around the user with a radius of 20 meters
     private void drawBoundary(Location location){
         Log.d(TAG,"Draw");
         if(location != null){
@@ -636,6 +716,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    // Method to check for certain achievements
     private void checkAchievements() {
         Log.d(TAG,"We're here!");
         try {
@@ -660,6 +741,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    // Method for achievements that deal with quantity of letters
     private void checkLetterAchievements(char c, int index){
         if(c == 'A' && letterCount[index] == 0)
             achievements[5] = true;
@@ -674,6 +756,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
+    // Method that checks for location/internet connectivity
     private boolean checkInternetLocation(int caseNum){
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -690,7 +773,9 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             return isConnected;
     }
 
-
+    /**
+     * Below are the different AsyncTasks used to store data from storage
+     */
     class StoreDataMarker extends AsyncTask<ArrayList<MarkerData>, Void, Boolean> {
 
         @Override

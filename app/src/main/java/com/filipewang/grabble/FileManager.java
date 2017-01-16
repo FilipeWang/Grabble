@@ -19,9 +19,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
- * Created by Filipe on 04-Nov-16.
+ * This class is used to deal with Files in storage. It is also used to parse KML files.
  */
 public class FileManager {
+
+    // Set up necessary fields
     private String root = Environment.getExternalStorageDirectory().toString();
     private String currDay;
     private String TAG = "FileManager";
@@ -30,15 +32,18 @@ public class FileManager {
     private int [] letterCount;
     private boolean [] achievements;
 
+    // Constructor that sets the current day used as IDs for certain files.
     public FileManager(){
         cm = new CalendarManager();
         currDay = cm.getCurrentDay();
     }
 
+    // Setters
     public void setMarkerList(ArrayList<MarkerData> temp){ markerList = temp; }
     public void setLetterCount(int [] temp){ letterCount = temp; }
     public void setAchievements(boolean [] temp) { achievements = temp; }
 
+    // Method to store a marker list (a marker list has been set before this method is called).
     public void storeMarkerList(){
         try{
             File del = new File(root + "/" + currDay + ".tmp");
@@ -53,6 +58,7 @@ public class FileManager {
         }
     }
 
+    // Method to retrieve a marker list from storage.
     public ArrayList<MarkerData> retrieveMarkerList(){
         try{
             FileInputStream fis = new FileInputStream(root + "/" + currDay + ".tmp");
@@ -67,6 +73,7 @@ public class FileManager {
         }
     }
 
+    // Method to retrieve a marker list from storage.
     public int [] retrieveLetters(){
         try{
             FileInputStream fis = new FileInputStream(root + "/data.dat");
@@ -81,6 +88,7 @@ public class FileManager {
         }
     }
 
+    // Method to store the inventory (the inventory has been set before this method is called).
     public void storeLetters(){
         try{
             File del = new File(root + "/data.dat");
@@ -95,6 +103,7 @@ public class FileManager {
         }
     }
 
+    // Method to retrieve the achievements from storage.
     public boolean [] retrieveAchievements(){
         try{
             FileInputStream fis = new FileInputStream(root + "/achievements.dat");
@@ -109,6 +118,7 @@ public class FileManager {
         }
     }
 
+    // Method to store the achievements (the achievements has been set before this method is called).
     public void storeAchievements(){
         try{
             File del = new File(root + "/achievements.dat");
@@ -123,6 +133,7 @@ public class FileManager {
         }
     }
 
+    // Method to parse a KML file, we work on it as if it was an XML file
     public ArrayList<MarkerData> parseKmlFile(String fileName){
         File KMLFile = new File(root + "/" + fileName);
         ArrayList<MarkerData> markerList = new ArrayList<>();
@@ -131,6 +142,8 @@ public class FileManager {
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(KMLFile);
             doc.getDocumentElement().normalize();
+
+            // Each point are separated by Placemark nodes
             NodeList list = doc.getElementsByTagName("Placemark");
 
             for(int i = 0; i < list.getLength(); i++){
@@ -139,9 +152,12 @@ public class FileManager {
                 String letter = "";
                 Node curr = list.item(i);
                 if (curr.getNodeType() == Node.ELEMENT_NODE) {
+
+                    // Grab information from each of the sub nodes
                     Element e = (Element) curr;
                     name = e.getElementsByTagName("name").item(0).getTextContent();
                     letter = e.getElementsByTagName("description").item(0).getTextContent();
+                    // Point has a sub node with coordinates so get that too
                     NodeList list2 = e.getElementsByTagName("Point");
                     Node curr2 = list2.item(0);
                     if (curr2.getNodeType() == Node.ELEMENT_NODE){
@@ -150,15 +166,18 @@ public class FileManager {
                     }
                 }
 
+                // Create an object MarkerData with all the information acquired and add it to the list
                 MarkerData temp = new MarkerData(name,letter,coordinates);
                 markerList.add(temp);
             }
         } catch (Exception e) {
             Log.d(TAG, "Error parsing KML");
         }
+        // Return the list even if it's empty
         return markerList;
     }
 
+    // Turn the inventory into a string so it's readable to the user
     public String getLetterCount() {
         String text = "";
         for (int i = 1; i < 27; i++) {
@@ -171,6 +190,7 @@ public class FileManager {
         return text;
     }
 
+    // Reset marker data in case of an error
     public void resetMarkers(){
         File del = new File(root + "/data.dat");
         del.delete();
