@@ -4,13 +4,18 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+/**
+ * This class is the used for the InfoScreen Activity.
+ * It simply contains a string with information.
+ */
+
 public class InfoScreen extends AppCompatActivity {
 
     final String text = "This application was developed for the course Software Engineering Large Practical." +
             "\n\nThere are many references that were used in the production in this application." +
             "\n\nMost of the ideas and information were taken from the Android Developer Guide and Stackoverflow." +
             "\n\nAll icons used were taken from the Google Material Open Source Icons." +
-            "\n\nFinally the Floating Button was taken from Clans (Dmytro Tarianyk) in his GitHub repository FloatingActionButton";
+            "\n\nFinally the Floating Button was taken from Clans (Dmytro Tarianyk) in his GitHub repository FloatingActionButton.";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

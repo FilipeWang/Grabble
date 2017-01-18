@@ -96,7 +96,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
-        // Set the fields to the current isntance
+        // Set the fields to the current instance
         fm = new FileManager();
         calendarManager = new CalendarManager();
         pref = getSharedPreferences("PREFS", 0);

@@ -28,8 +28,13 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class is the used for the MainScreen Activity.
+ * This is the class where data is downloaded from the server to later use in Capture Mode.
+ */
 public class MainScreen extends AppCompatActivity implements View.OnClickListener{
 
+    // Fields
     private ProgressDialog progressDialog;
     private SharedPreferences pref;
     private CalendarManager calendarManager;
@@ -43,7 +48,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
             "K","L","M","N","O",
             "P","Q","R","S","T",
             "U","V","W","X","Y","Z"};
-    private static int easterEgg = 0;
+    private static int easterEgg = 0; // Counter for how many clicks were done to the title
     private String letterOfDay;
 
     @Override
@@ -51,16 +56,25 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
+        // Set the fields to the current instance
         calendarManager = new CalendarManager();
 
         // Set up letter of the day
         letterOfDaySetup();
 
+        // Set up listeners for the different buttons
         for (int id : BUTTONS) {
             findViewById(id).setOnClickListener(this);
         }
     }
 
+    /**
+     * Setup for the letter of the day.
+     * It uses the current day as the ID stored in the SharedPreferences.
+     * It first checks if the current letter of the day is a zero (meaning none has been assigned).
+     * Then if it is zero it'll delete any previous entries (from previous days) from the SharedPreferences.
+     * Then it'll assign a new letter and commit it to memory.
+     */
     private void letterOfDaySetup(){
         pref = getSharedPreferences("PREFS", 0);
         String currDay = calendarManager.getCurrentDay();
@@ -82,9 +96,12 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
         }
     }
 
+    // Deals with any results of the action listener of the buttons.
     @Override
     public void onClick(View view) {
         switch(view.getId()){
+
+            // Easter egg, if the title is clicked twice the bonus letter is shown
             case R.id.mainTitle:
                 easterEgg++;
                 if(easterEgg == 5){
@@ -94,13 +111,21 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                             message, Toast.LENGTH_SHORT).show();
                 }
                 break;
+
+            // Takes the user to the settings screen
             case R.id.settingsButton:
                 startActivity(new Intent(MainScreen.this, SettingsScreen.class));
                 break;
+
+            // Takes the user to the information screen
             case R.id.infoButton:
                 startActivity(new Intent(MainScreen.this, InfoScreen.class));
                 break;
+
+            // Takes the user to capture mode if there location/internet are on.
             case R.id.mainCapture:
+
+                //Check for the different connections
                 ConnectivityManager cm =
                         (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -111,6 +136,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                 boolean isConnected = activeNetwork != null &&
                         activeNetwork.isConnectedOrConnecting();
 
+                // Act depending on what is connected on what is not
                 if (!isConnected) {
                     Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Connect to the internet!", Snackbar.LENGTH_LONG)
                             .show();
@@ -118,12 +144,16 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                     Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Turn on your GPS!", Snackbar.LENGTH_LONG)
                             .show();
                 } else {
+
+                    // Getting here means all the checks passed and the data will now be downloaded
                     CalendarManager test = new CalendarManager();
                     String currDayWeek = test.getDayOfWeek();
                     String currDay = test.getCurrentDay();
                     new DownloadMapData().execute(currDayWeek, currDay);
                 }
                 break;
+
+            // Take the user to Word mode
             case R.id.mainWord:
                     startActivity(new Intent(MainScreen.this,WordScreen.class));
                 break;
@@ -131,12 +161,14 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
     }
 
 
+    // AsyncTask used to download data from the server
     class DownloadMapData extends AsyncTask<String, Void, Boolean> {
         private String root = Environment.getExternalStorageDirectory().toString();
         private String TAG = "DownloadMapData";
         private String dayOfWeek;
         private String currDay;
 
+        // Set up a progress dialog
         @Override
         protected void onPreExecute() {
             progressDialog = ProgressDialog.show(MainScreen.this, "Downloading",
@@ -144,19 +176,26 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
             progressDialog.show();
         }
 
+        // Download the data
         @Override
         protected Boolean doInBackground(String... data) {
             int count;
-            dayOfWeek = data[0];
-            currDay = data[1];
+            dayOfWeek = data[0]; // Day of the week to put in url
+            currDay = data[1]; // Current day to use as ID for the files
+
+            // Create the URL needed
             String urlBase = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/";
             String urlString = urlBase + dayOfWeek + ".kml";
+
+            // Create the KML file (that'll be parsed into the actual file)
             File kmlFile = new File(root + "/" + currDay + ".kml");
             File actualFile = new File(root + "/" + currDay + ".tmp");
             try {
+                // If the file exists that means data has been downloaded already so don't do it again
                 if (actualFile.exists() && !actualFile.isDirectory()) {
                     Log.d(TAG, "Exists!");
                 } else {
+                    // Download the data
                     URL url = new URL(urlString);
                     URLConnection urlCon = url.openConnection();
                     urlCon.connect();
@@ -171,6 +210,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                     outStream.close();
                     inStream.close();
 
+                    // Parse the KML file and save the result
                     FileManager fm = new FileManager();
                     ArrayList<MarkerData> markerList = fm.parseKmlFile(currDay + ".kml");
                     fm.setMarkerList(markerList);
@@ -183,7 +223,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
             return true;
         }
 
-
+        // If everything went fine move to the capture screen
         @Override
         protected void onPostExecute(Boolean flag) {
             if (!flag) {
@@ -191,7 +231,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                 Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error downloading the files occurred!", Snackbar.LENGTH_LONG)
                         .show();
             } else {
-                cleanUp();
+                cleanUp(); // Delete data from previous days
                 progressDialog.dismiss();
                 Toast.makeText(MainScreen.this,
                         "Moving to capture mode...", Toast.LENGTH_SHORT).show();
@@ -199,6 +239,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
             }
         }
 
+        // Method that looks for any file that has a different day as an ID than the current one
         private void cleanUp() {
             File rootFolder = new File(root);
             File fileList[] = rootFolder.listFiles();

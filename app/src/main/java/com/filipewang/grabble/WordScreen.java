@@ -30,16 +30,22 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+/**
+ * This class is the used for the WordScreen Activity.
+ * It contains a picture of the values of each letter and pickers
+ * to create a letter.
+ * In addition to that it uses the Google Play services to add achievements
+ * and leaderboards to the game.
+ */
 public class WordScreen extends AppCompatActivity implements NumberPicker.OnValueChangeListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener{
 
+    // Google API fields
     private GoogleApiClient mGoogleApiClient;
-
     private static int RC_SIGN_IN = 9001;
     private static int LEADERBOARD = 1000;
     private static int ACHIEVEMENTS = 1001;
-
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInflow = true;
     private boolean mSignInClicked = false;
@@ -81,16 +87,20 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_word_screen);
 
+        // Set the fields
         calendarManager = new CalendarManager();
         pref = getSharedPreferences("PREFS", 0);
 
+        // Get the setting to use for the bonus letter
         letterSetting = pref.getBoolean("bonusLetter",true);
 
+        // If the setting for the bonus letter is off set the bonus letter as a zero
         if(letterSetting)
             letterOfDay = pref.getString(calendarManager.getCurrentDay(),"0").charAt(0);
         else
             letterOfDay = '0';
 
+        // Connect to the Google API
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -101,14 +111,17 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                     .build();
         }
 
+        // Set the onClickListenever
         for (int id : BUTTONS) {
             findViewById(id).setOnClickListener(this);
         }
 
+        // Get the views to later use to display values
         currWord = (TextView) findViewById(R.id.currentWord);
         currValue = (TextView) findViewById(R.id.currentValue);
         currScore = (TextView) findViewById(R.id.currentScore);
 
+        // Set up the pickers
         for (int id : PICKERS) {
             NumberPicker np = (NumberPicker) findViewById(id);
             np.setMaxValue(0);
@@ -117,17 +130,23 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
             np.setOnValueChangedListener(this);
             np.setWrapSelectorWheel(false);
         }
+
+        // Show the default word and its value
         String curr = getCurrentWord();
         currWord.setText("Word: " + curr);
         currValue.setText("Value: " + String.valueOf(getValue(curr,letterOfDay)));
 
+        // Set up the score in the top right corner
         int score = pref.getInt("currentScore",0);
         currScore.setText(String.valueOf(score));
 
+        // Get the achievements and sync them
         fm = new FileManager();
         achievements = fm.retrieveAchievements();
         fm.setAchievements(achievements);
         fm.storeAchievements();
+
+        // Load the dictionary to later use to validate words
         loadDictionary();
     }
 
@@ -143,19 +162,34 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         super.onStop();
     }
 
+    // Method to handle onClickListeners
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+
+            // Button to attempt to create a word
             case R.id.createWordButton:
+
+                // First get the word and calculate its value
                 String curr = getCurrentWord();
                 int wordScore = getValue(curr,letterOfDay);
+
+                // Check if the word is valid and if there are enough letters in the inventory
                 boolean wordValidity = checkWordValidity(curr.toLowerCase(),dictionary);
                 int [] letterCount = fm.retrieveLetters();
                 boolean inventory = checkInventory(curr,letterCount);
+
+                // Proceed if the word is valid and there are enough letters
                 if(wordValidity && inventory){
+
+                    // Take the letters away form the inventory and update the score
                     deductFromInventory(curr,letterCount);
                     int score = pref.getInt("currentScore",0);
+
+                    // Check for overflow
                     if((Integer.MAX_VALUE - wordScore) > score){
+
+                        // Update the score an show the user a message
                         int newScore = score + wordScore;
                         SharedPreferences.Editor edit = pref.edit();
                         edit.putInt("currentScore", newScore);
@@ -169,15 +203,21 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), message, Snackbar.LENGTH_LONG)
                                 .show();
                         currScore.setText(String.valueOf(newScore));
+
+                        // Check for achievements
                         if(newScore > 99){
-                            achievements[7] = true;
-                            checkAchievements();
+                            boolean internet = checkInternetLocation(1);
+                            if(internet) {
+                                achievements[7] = true;
+                                checkAchievements();
+                            }
                         }
                     } else{
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Over max score!", Snackbar.LENGTH_LONG)
                                 .show();
                     }
                 }else{
+                    // Display appropriate error message
                     if(wordValidity)
                         Snackbar.make(findViewById(R.id.coordinatorLayoutWord), "Not enough letters!", Snackbar.LENGTH_LONG)
                                 .show();
@@ -186,6 +226,8 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                                 .show();
                 }
                 break;
+
+            // Check the current inventory
             case R.id.floatingInventoryWord:
                 AlertDialog.Builder builder = new AlertDialog.Builder(WordScreen.this);
                 fm.setLetterCount(fm.retrieveLetters());
@@ -195,7 +237,11 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 break;
+
+            // Check the achievements
             case R.id.floatingAchievementsWord:
+
+                // Only allow check if there is internet
                 boolean internet = checkInternetLocation(1);
                 if(internet){
                     try {
@@ -226,10 +272,16 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
                             .show();
                 }
                 break;
+
+            // Check leaderboards
             case R.id.floatingLeaderboardsWord:
+
+                // Only allow check if there is internet
                 boolean internet2 = checkInternetLocation(1);
                 if(internet2){
                     try {
+
+                        // Submit new score before showing the leaderboards
                         int score = pref.getInt("currentScore",0);
                         Games.Leaderboards.submitScore(mGoogleApiClient, getApplicationContext().getResources().getString(R.string.leaderboard_word), score);
                         startActivityForResult(Games.Leaderboards.getLeaderboardIntent(mGoogleApiClient,
@@ -263,6 +315,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         }
     }
 
+    // Check achievements for the Word mode
     private void checkAchievements() {
         try {
             if (achievements[7])
@@ -274,12 +327,14 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         }
     }
 
+    // Given a word curr, check if it exists in the dictionary dict
     public static boolean checkWordValidity(String curr, ArrayList<String> dict) {
         return dict.contains(curr.toLowerCase());
     }
 
+    // Given a word curr, check if there are enough letters to create it given an inventory letterCount
     public static boolean checkInventory(String curr, int [] letterCount){
-        int [] tempCount = letterCount.clone();
+        int [] tempCount = letterCount.clone(); // Cannot copy by reference or it'll mess up
         for(int i = 0; i < curr.length(); i++){
             char c = curr.charAt(i);
             int numValue = (int) c;
@@ -294,6 +349,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         return flag;
     }
 
+    // Subtract the letters of word curr from the inventory letterCount
     private void deductFromInventory(String curr, int [] letterCount){
         for(int i = 0; i < curr.length(); i++){
             char c = curr.charAt(i);
@@ -305,13 +361,16 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         fm.storeLetters();
     }
 
+    // Listener for a change in a picker
     @Override
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+        // Update text that is displayed if there was a change
         String curr = getCurrentWord();
         currWord.setText("Word: " + curr);
         currValue.setText("Value: " + String.valueOf(getValue(curr,letterOfDay)));
     }
 
+    // Get current work from pickers
     private String getCurrentWord(){
         String word = "";
         for(int id: PICKERS){
@@ -321,6 +380,8 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         return word;
     }
 
+    // Get the value of a word with the bonus letter
+    // Note that if the letter is zero '0' it'll never match
     public static int getValue(String word, char bonusLetter){
         int value = 0;
         for(int i=0; i<7; i++){
@@ -334,6 +395,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         return value;
     }
 
+    // Load dictionary from assets
     private void loadDictionary(){
         ArrayList<String> dict = new ArrayList<>();
         try {
@@ -361,6 +423,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         mGoogleApiClient.connect();
     }
 
+    // Error handling for not login in to Google Services
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if (mResolvingConnectionFailure) {
@@ -387,6 +450,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         }
     }
 
+    // Error handling for trying to access Google Services
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
@@ -464,6 +528,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
 
     }
 
+    // Check for internet and location services
     private boolean checkInternetLocation(int caseNum){
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -480,6 +545,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
             return isConnected;
     }
 
+    // AsyncTask to save achievement data
     class StoreDataAchievementsWord extends AsyncTask<boolean[], Void, Boolean> {
 
         @Override

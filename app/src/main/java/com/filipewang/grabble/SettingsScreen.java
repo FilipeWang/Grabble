@@ -11,6 +11,10 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+/**
+ * This class is the used for the SettingsScreen Activity.
+ * Each setting option is stored in the SharedPreferences.
+ */
 public class SettingsScreen extends AppCompatActivity {
 
     private SharedPreferences pref;
@@ -25,6 +29,7 @@ public class SettingsScreen extends AppCompatActivity {
         pref = getSharedPreferences("PREFS", 0);
         final SharedPreferences.Editor edit = pref.edit();
 
+        // Inventory reset button
         Button resetInventoryButton = (Button) findViewById(R.id.buttonSettingsResetInventory);
         resetInventoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +62,7 @@ public class SettingsScreen extends AppCompatActivity {
             }
         });
 
+        // Score reset button
         Button resetScoreButton = (Button) findViewById(R.id.buttonSettingsResetScore);
         resetScoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,9 +90,11 @@ public class SettingsScreen extends AppCompatActivity {
             }
         });
 
+        // Set the fields for the current value
         letterSetting = pref.getBoolean("bonusLetter",true);
         markerSetting = pref.getBoolean("markerColor",false);
 
+        // Set up the switches for the options
         SwitchCompat bonusLetter = (SwitchCompat) findViewById(R.id.settingsLetterSwitch);
         bonusLetter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -105,6 +113,7 @@ public class SettingsScreen extends AppCompatActivity {
             }
         });
 
+        // Show the switches with the correct value
         bonusLetter.setChecked(letterSetting);
         markerColor.setChecked(markerSetting);
     }
