@@ -581,7 +581,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     // Add the letter to the user's inventory
                     char c = marker.getTitle().charAt(0);
                     int numValue = (int) c;
-                    int indexLetter = numValue - 64;
+                    int indexLetter = numValue - 64; // ASCII
 
                     // If the secret letter is activated check for it and give double the amount
                     if(c == letterOfDay) {

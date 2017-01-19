@@ -338,7 +338,7 @@ public class WordScreen extends AppCompatActivity implements NumberPicker.OnValu
         for(int i = 0; i < curr.length(); i++){
             char c = curr.charAt(i);
             int numValue = (int) c;
-            int indexLetter = numValue - 64;
+            int indexLetter = numValue - 64; // ASCII
             tempCount[indexLetter]--;
         }
         boolean flag = true;
