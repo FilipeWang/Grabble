@@ -713,6 +713,9 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
             co.strokeColor(Color.RED);
             co.strokeWidth(4.0f);
             currCircle = mMap.addCircle(co);
+        } else{
+            Snackbar.make(findViewById(R.id.coordinatorLayoutCapture), "No location!", Snackbar.LENGTH_LONG)
+                    .show();
         }
     }
 
