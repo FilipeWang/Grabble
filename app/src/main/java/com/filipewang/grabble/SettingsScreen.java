@@ -35,7 +35,7 @@ public class SettingsScreen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(SettingsScreen.this);
-                builder.setMessage("Are you sure you want to clear the inventory (including the number of letters collected until now)?")
+                builder.setMessage("Are you sure you want to clear the inventory (excluding the number of letters collected until now)?")
                         .setCancelable(false)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
