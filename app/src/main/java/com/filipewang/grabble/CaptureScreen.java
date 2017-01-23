@@ -583,6 +583,9 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     int numValue = (int) c;
                     int indexLetter = numValue - 64; // ASCII
 
+                    // Achievements
+                    checkLetterAchievements(c,indexLetter);
+
                     // If the secret letter is activated check for it and give double the amount
                     if(c == letterOfDay) {
                         letterCount[indexLetter] = letterCount[indexLetter] + 2;
@@ -595,8 +598,7 @@ public class CaptureScreen extends FragmentActivity implements OnMapReadyCallbac
                     // Increase the overall letters collected count
                     letterCount[0]++;
 
-                    // Check for achievements for this particular letter
-                    checkLetterAchievements(c,indexLetter);
+                    // Check for achievements earned thus far
                     checkAchievements();
 
                     // Use the index to remove it from the list and update the files

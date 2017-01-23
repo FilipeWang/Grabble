@@ -54,13 +54,14 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Set up letter of the day
+        letterOfDaySetup();
+
         setContentView(R.layout.activity_main_screen);
 
         // Set the fields to the current instance
         calendarManager = new CalendarManager();
-
-        // Set up letter of the day
-        letterOfDaySetup();
 
         // Set up listeners for the different buttons
         for (int id : BUTTONS) {
