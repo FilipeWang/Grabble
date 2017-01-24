@@ -55,13 +55,12 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set up letter of the day
-        letterOfDaySetup();
-
         setContentView(R.layout.activity_main_screen);
-
         // Set the fields to the current instance
         calendarManager = new CalendarManager();
+
+        // Set up letter of the day
+        letterOfDaySetup();
 
 
         // Set up listeners for the different buttons
@@ -108,6 +107,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
                 easterEgg++;
                 if(easterEgg == 5){
                     easterEgg = 0;
+                    letterOfDaySetup();
                     String message = "Secret bonus letter: " + letterOfDay;
                     Toast.makeText(MainScreen.this,
                             message, Toast.LENGTH_SHORT).show();
@@ -228,6 +228,7 @@ public class MainScreen extends AppCompatActivity implements View.OnClickListene
         // If everything went fine move to the capture screen
         @Override
         protected void onPostExecute(Boolean flag) {
+            letterOfDaySetup();
             if (!flag) {
                 progressDialog.dismiss();
                 Snackbar.make(findViewById(R.id.coordinatorLayoutMain), "Some error downloading the files occurred!", Snackbar.LENGTH_LONG)
